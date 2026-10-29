@@ -632,6 +632,13 @@
     gap: 12px; margin-top: 12px;
   }
   .story-foot .story-next { margin-top: 0; }
+  /* 批 B51：跳过键 —— 比「朗读」显眼一点点，但不抢「点击继续」的位置 */
+  .story-skip {
+    background: transparent; border: 1px solid #3a4a6e; color: #cfd9ea;
+    font-size: 0.75rem; padding: 5px 14px; border-radius: 999px;
+    cursor: pointer; font-family: inherit; letter-spacing: .5px;
+  }
+  .story-skip:active { background: #1a2742; }
   .story-tts {
     background: transparent; border: 1px solid #2c3a5c; color: #7f9ec9;
     font-size: 0.75rem; padding: 5px 12px; border-radius: 999px;
@@ -3108,7 +3115,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.15.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.15.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -3286,6 +3293,8 @@
       <div class="story-text" id="storyText"><span id="storyBody"></span><span class="story-caret">▍</span></div>
       <div class="story-foot">
         <button class="story-tts" id="storyTts" type="button">🔊 朗读：关</button>
+        <!-- 批 B51：只在「知识点讲解」这类可跳过的段落出现；序章 / 结局 / 守律者台词没有它 -->
+        <button class="story-skip hidden" id="storySkip" type="button">跳过 ▸</button>
         <div class="story-next" id="storyNext">点击继续 ▶</div>
       </div>
     </div>
@@ -4070,7 +4079,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.15.0
+   数境之旅 · 原型 v1.15.1
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -4239,6 +4248,7 @@ function defaultState() {
     endSeen: 0,              /* 批 END：谢幕卷看过的时间戳（0 = 还没看过） */
     /* 批 B48：旧影台（英灵图）—— { owned:[{id,name,grade,line,from}], seen, mapDone } */
     spirit: spiritDefault(),
+    knoteSeen: {},          /* 批 B51：讲过讲解的知识点 { key: 1 } */
     /* 背包（批 A4/A5 落地内容）：药品 / 增益 / 材料 */
     bag: { potion: [], buff: [], mat: [] },
     /* 免费洗点次数：开局 1 次 + 每通关一张数域地图 +1（累积不清零）*/
@@ -4265,7 +4275,7 @@ var SLOT_COUNT = 5;                   // 存档位数量
    本机档与外来档并存，能对比、能随时删，比「先覆盖再备份」可靠得多。 */
 var IMPORT_SLOT = 0;
 var SLOT_PREF = 'shujing_slot';       // 当前「使用中」的存档位（自动存档写入此处）
-var SAVE_VER = 24;   /* 批 B48 旧影台：+spirit（v23 及更早老档读入时补默认，不作废） */   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
+var SAVE_VER = 25;   /* 批 B51 讲解去过重：+knoteSeen（v24 及更早老档补默认，不作废） */   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
 
 function slotStorageKey(n) { return 'shujing_save_' + n; }
 function clampSlot(n) {
@@ -4351,7 +4361,8 @@ function saveGame(slot) {
       stat: G.stat, achv: G.achv,
       wish: G.wish || wishDefault(),                                    /* 批 W1 心愿卡 */
       endSeen: G.endSeen || 0,                                          /* 批 END 谢幕卷已看 */
-      spirit: G.spirit || spiritDefault()                               /* 批 B48 旧影台 */
+      spirit: G.spirit || spiritDefault(),                              /* 批 B48 旧影台 */
+      knoteSeen: G.knoteSeen || {}                                      /* 批 B51 讲过的知识点 */
     }));
   } catch (e) {
     /* 2026-10-19：写失败不再静默 —— 让 saveFailNotice 露一次脸 */
@@ -4492,6 +4503,8 @@ function loadGame(slot) {
       /* 批 B48：旧影台（v23 及更早的老档没有这个字段 → 补默认，不作废） */
       G.spirit = (d.spirit && typeof d.spirit === 'object') ? d.spirit : spiritDefault();
       if (!Array.isArray(G.spirit.owned)) G.spirit.owned = [];
+      /* 批 B51：讲过的知识点（v24 及更早老档没有 → 空表，等于「都没讲过」） */
+      G.knoteSeen = (d.knoteSeen && typeof d.knoteSeen === 'object') ? d.knoteSeen : {};
       /* 批 END：谢幕卷「已看过」的时间戳（只决定首次是否自动播三句，不影响能否重看） */
       G.endSeen = d.endSeen || 0;
       // 老存档兼容：装备栏里若还是老结构（无 affixes）则清空
@@ -5350,6 +5363,15 @@ function drawCharacter(ctx, W, H, opt) {
     ctx.fillStyle = 'rgba(242,140,150,0.5)';
     ctx.fillRect(eyeLX - s * 0.28, eyeY + eyeH + s * 0.06, s * 0.42, s * 0.22);
     ctx.fillRect(eyeRX + eyeW - s * 0.14, eyeY + eyeH + s * 0.06, s * 0.42, s * 0.22);
+  }
+
+  // ---- 胡须（批 B51）：只给成年角色用；玩家捏人里不出这一项，不传就没胡子 ----
+  if (opt.beard) {
+    ctx.fillStyle = hairC;
+    var bdW = headW * 0.46, bdX = cx - bdW / 2;
+    var bdY = headY + headH * 0.70, bdH = headH * 0.24;
+    ctx.fillRect(bdX, bdY, bdW, bdH);                                             // 下颌须
+    ctx.fillRect(cx - bdW * 0.30, bdY - headH * 0.10, bdW * 0.60, headH * 0.11);  // 上唇髭
   }
 
   // ---- 头发 ----
@@ -18148,7 +18170,12 @@ function syncStoryTts() {
 }
 
 /* ---------- 剧情主流程 ---------- */
-function playStory(lines, onDone) {
+/* opts.skip：这一段允许「跳过」（只有知识点讲解用；序章/结局给了就是让玩家跳过自家剧情） */
+var storySkipOK = false;
+function playStory(lines, onDone, opts) {
+  storySkipOK = !!(opts && opts.skip);
+  var _sk = document.getElementById('storySkip');
+  if (_sk) _sk.classList.toggle('hidden', !storySkipOK);
   storyQueue = lines;
   storyIndex = 0;
   storyDone = onDone;
@@ -18252,8 +18279,12 @@ var STAGE_NPC = {
   '墨守先生': { side: 'right', skin: '#e0b088', cloth: '#3f5a86', hair: 3, acc: 3, h: 1.06, ph: 3.3 },
   '执笔先生': { side: 'right', skin: '#e0b088', cloth: '#6a5a8c', hair: 3, acc: 0, h: 1.04, ph: 1.2 },
   '星罗':    { side: 'right', skin: '#f0c9a0', cloth: '#4a5f9c', hair: 2, acc: 4, h: 0.98, ph: 4.1, gender: 'girl' },
-  /* 批 C4-b：试炼微课的引路人（跨图一致，同一个「替你打通关节」的人） */
-  '引路人':  { side: 'right', skin: '#e8c39a', cloth: '#3f7a7a', hair: 3, acc: 2, h: 1.02, ph: 2.6 }
+  /* 批 C4-b：试炼微课的引路人（跨图一致，同一个「替你打通关节」的人）
+     批 B51：改成偏成熟的长者形象 —— 束发（发髻）+ 长袍垂地 + 短须 + 头身比 0.84。
+     原来的 h 1.02 / hd 1 / 无袍，看着像「大孩子」，开口讲知识点却像长辈，人对不上。
+     它同时被两处用：进图前的试炼微课、错题后的知识点讲解 —— 同一个声音就该是同一张脸。 */
+  '引路人':  { side: 'right', skin: '#e0b088', cloth: '#3f7a7a', hair: 1, acc: 3,
+               h: 1.12, ph: 2.6, hd: 0.84, robe: 1.55, wq: 1.03, beard: true }
 };
 var STAGE_CLOTH = ['#4a7c59', '#8a6a3a', '#4a6a8c', '#9a5a6a', '#6a5a8c', '#3f7a7a', '#7a6a4a'];
 
@@ -18330,7 +18361,7 @@ function stageAppearance(who) {
   return {
     id: 'npc:' + who, side: t.side, kind: 'char', h: t.h || 1, ph: t.ph || 0.9, enter: 0,
     opt: { hair: t.hair, skin: t.skin, cloth: t.cloth, acc: t.acc,
-           gender: t.gender,
+           gender: t.gender, beard: !!t.beard,
            wq: t.wq || 1, hd: t.hd || 1, robe: t.robe || 1 }
   };
 }
@@ -18690,6 +18721,15 @@ function stageBeat() {
 }
 
 document.getElementById('storyNext').onclick = advanceStory;
+/* 批 B51：跳过键 —— 只在 storySkipOK 的段落出现（讲解），点了直接把队列推到末尾，
+   等价于连点「继续」到结束；onDone 照常触发，所以不会卡在演出页。 */
+document.getElementById('storySkip').onclick = function (e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  if (!storySkipOK) return;
+  Audio2.init();
+  storyIndex = storyQueue.length;
+  renderStoryLine();
+};
 document.getElementById('storyTts').onclick = function () {
   Audio2.init();
   OPT.tts = OPT.tts ? 0 : 1;
@@ -26309,12 +26349,27 @@ function knoteSpeaker() {
   return '引路人';
 }
 
-/* 把「引子 + 三条正文」拼成一段戏；没有这条知识点的讲解就返回 null */
+/* 这条知识点的讲解讲过没有（批 B51：讲过就降级成两句，别拿同一段四句当噪音放第三遍） */
+function knoteSeen(key) {
+  try { return !!(G.knoteSeen && G.knoteSeen[key]); } catch (e) { return false; }
+}
+function knoteMarkSeen(key) {
+  if (!key) return;
+  try { if (!G.knoteSeen) G.knoteSeen = {}; G.knoteSeen[key] = 1; } catch (e) {}
+}
+
+/* 把讲解拼成一段戏：**第一次讲全 4 屏，之后只讲 2 屏**（引子 + 第一句正文）。
+   为什么保留第一句而不是最后一句：第一句是「这个知识点是什么」，最后一句多是「坑在哪」——
+   当提醒时先说清是什么，比只喊一声「别忘进位」更有用。 */
 function knoteLines(key) {
   var rec = KNOTE[key];
   if (!rec) return null;
   var who = knoteSpeaker();
   var out = [{ who: who, text: rec.hook }];
+  if (knoteSeen(key)) {
+    out.push({ who: who, text: rec.body[0] });
+    return out;
+  }
   for (var i = 0; i < rec.body.length; i++) out.push({ who: who, text: rec.body[i] });
   return out;
 }
@@ -27117,6 +27172,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.15.1", d: "10-29", one: "引路人换了成人相；同一知识点讲过只讲两句；讲解可跳过", notes: ["讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。","同一个知识点第一次讲四句，之后再错到它只讲两句——先用一句说清是什么，不再把同一段当噪音放第三遍。","讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。"] },
   { v: "v1.15.0", d: "10-29", one: "讲解补齐到 74 个知识点（一到六年级全都有）", notes: ["上一版只有三年级 10 个知识点有讲解，其余遇到错题只挡一下、不开口。现在 74 个全都补齐——不管你在哪个年级的域里错了题，回图前都有一段。","每一段都是四句：一句开头 + 三句正题。不讲你错的那一道，只讲那道题背后的那个知识点。","难度题（找规律、找次品、鸽巢、优化问题这类）讲的是「怎么入手」，不是「公式是什么」——这类题本来就没有一个公式能概括。","还是那句话：有没有旧影都听得到。没有的话，由书院的引路人讲同一段。"] },
   { v: "v1.14.0", d: "10-29", one: "答错时旧影替你挡一下；打完把这题背后的知识点讲一遍（三年级 10 个）", notes: ["现在你手上有旧影了。战斗中第一次答错，它会替你挡掉那一下 —— 每场只挡一次，挡完那句写得很直：「下次自己来。」","打完点「回到地图」，它会讲一段：只讲这道题背后的那个知识点，四句话，不针对你错的那一道。讲透一个，比连讲五个有用。","一场只讲一个。要是这局错了三个知识点，它挑错得最多的那个讲。","结算页会先出现一行小字告诉你：谁要讲、讲哪个 —— 不至于点了按钮突然冒出一段戏。","这一段不是奖励。「听讲解」这件事跟有没有旧影无关：没有旧影的孩子，同样的讲解由书院的引路人讲。","这一版先做三年级 10 个知识点（两位数乘一位数、两位数除以一位数、长方形周长、长方形面积、单位换算、时分秒换算、两位数乘两位数、年月日、位置与方向、复式统计表）。其余年级陆续补。"] },
   { v: "v1.13.0", d: "10-29", one: "大地图多一格「旧影台」：一场打不完的仗，倒下那刻它接手", notes: ["通关任意一个数域之后，世界图上多出一格「旧影台」。","进去那只影子怎么也打不完：血条厚得不讲道理。你先答对八道，它就在旁边看着。","等你真的撑不住、血被打空的那一刻，它现身，讲完自己为什么留在这里，然后替你收场，留下一缕给你。","一路答对也不用担心：答到十二道，它会说「这一程你没让我出手」，照样把灯留下。两种走法都拿得到 —— 不用为了看它而故意答错。","拿到的那一位会记在旧影台里。这一版它还不进裂隙，那一步放在下一批。"] },
@@ -27194,14 +27250,13 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.15.0',
+  ver: 'v1.15.1',
   date: '2026-10-29',
-  one: '旧影的讲解，现在从一年级到六年级 74 个知识点全都讲得出来。',
+  one: '讲解换了位更像先生的人来讲；同一个知识点讲过就不再絮叨，还能一键跳过。',
   items: [
-    '上一版只有三年级 10 个知识点有讲解，其余遇到错题只挡一下、不开口。现在 74 个全都补齐了 —— 不管你在哪个年级的域里错了题，回图前都有一段。',
-    '每一段都是四句：一句开头，三句正题。不讲你错的那一道，只讲那道题背后的那个知识点。',
-    '难度题（找规律、找次品、鸽巢、优化问题这类）讲的是「怎么入手」，不是「公式是什么」—— 这类题本来就没有一个公式能概括。',
-    '还是那句话：有没有旧影都听得到。没有的话，由书院的引路人讲同一段。'
+    '讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。',
+    '同一个知识点第一次讲四句，之后再错到它只讲两句 —— 先用一句说清是什么，不再把同一段当噪音放第三遍。',
+    '讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。'
   ]
 };
 
@@ -27368,12 +27423,14 @@ document.getElementById('btnBackMap').onclick = function () {
      守律者胜利且结局剧情还没播时让路：两段戏连着播会挤在一起。 */
   if (B.knotePending && !(k === 'boss' && won && !z._endPlayed)) {
     var _kl = knoteLines(B.knotePending);
+    knoteMarkSeen(B.knotePending);   /* 批 B51：讲过就记下，下次只讲两句 */
     B.knotePending = '';
     if (_kl) {
+      try { saveGame(); } catch (e) {}
       playStory(_kl, function () {
         try { show('screen-result'); } catch (e) {}
         document.getElementById('btnBackMap').onclick();
-      });
+      }, { skip: true });            /* 批 B51：讲解可以跳过 */
       return;
     }
   }
