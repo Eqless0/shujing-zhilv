@@ -2178,6 +2178,18 @@
   .stall-cell.t-liang { border-color: #2c5675; }
   .stall-cell.t-zhen { border-color: #4a3d1c; background: #151329; }
   /* 批 B48：旧影台入口卡片（彩蛋格，与六域卡片区分：冷蓝边） */
+  /* 批 B49：结算页「待会儿讲一句」的提示条（不抢标题，只是一行小字） */
+  .result-knote { margin: 8px auto 0; max-width: 460px; padding: 6px 10px;
+    border: 1px solid #24334f; border-radius: 8px; background: #0f1b2e;
+    color: #b9cde8; font-size: 0.8125rem; line-height: 1.5; text-align: center; }
+  .result-knote b { color: #9ad0ff; font-weight: normal; }
+  .result-knote .rk-tip { color: #6f8bb0; margin-left: 6px; }
+  /* 短屏（667×375 这类）：结算框本来就顶着上下边，这一行再占 30px 就把按钮挤出屏。
+     压到一行小字、去掉那半句提示（孩子已经准备点它了，不必再说明）。 */
+  @media (max-height: 460px) {
+    .result-knote { margin: 4px auto 0; padding: 2px 8px; font-size: 0.75rem; line-height: 1.3; }
+    .result-knote .rk-tip { display: none; }
+  }
   .map-card.spirit-card { border-color: #2b4a72; background: #101c30; }
   .map-card.spirit-card:hover { border-color: #5f8fc0; }
   .map-card.spirit-card .mc-name { color: #9ad0ff; }
@@ -3096,7 +3108,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.13.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.14.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4058,7 +4070,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.13.0
+   数境之旅 · 原型 v1.14.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -18279,6 +18291,11 @@ function stageAppearance(who) {
   /* 批 B48：旧影是「没有身体的说话人」—— 字幕上写它的名字，台上不站人（全场退暗）。
      第一版没这句，台上站的是主角小竹，字幕却写「旧影」，看着像主角在自言自语。 */
   if (who === '旧影') return null;
+  /* 批 B49：讲解由具体某位旧影开口（署名是它的化名），同样不该站成主角 */
+  try {
+    if (G && G.spirit && Array.isArray(G.spirit.owned) &&
+        G.spirit.owned.some(function (x) { return x && x.name === who; })) return null;
+  } catch (e) {}
   if (typeof G === 'undefined' || !G || !G.player) return null;
   var heroName = G.player.name || '小竹';
   if (who === '小竹' || who === heroName) {
@@ -18917,6 +18934,11 @@ function startBattle(zone, kind, monIdx) {
     gearRetryUsed: false,      // 回文重读：每场 1 次答错免伤并给出答案
     gearFirstSkillCd: false,  // 墨守律卷：每场首次施放主动技不进冷却
     pendingSkillNoCd: 0,      // 本题触发的是否享受「不进冷却」
+    /* ---- 批 B49：旧影讲知识点 ---- */
+    knoteTally: {},        // 本场每个知识点错了几次（选"讲哪个"用）
+    knoteLast: '',         // 最后一次错的知识点（并列时优先）
+    knotePending: '',      // 结算后待讲的知识点（回图前播）
+    spiritBlockUsed: 0,    // 旧影本场是否已替你挡过（每场一次）
     /* ---- 批 C4-b：游历战斗 ---- */
     scout: zoneAccess(zone) === 'scout'
   };
@@ -20937,6 +20959,20 @@ function resolveAnswer(correct, timeout) {
     // 批 C4-b：游历不设惩罚（怪物不多打），题没学过，错了不该挨打
     if (!B.scout) B.extraHit = 1;
 
+    /* 批 B49：旧影出手一次 —— 抵掉这次「怪的额外一击」。每场一次。
+       ⛔ 只在这里读结果、改 extraHit，不碰上面的判定链（resolveAnswer 复杂度全项目最高）。 */
+    if (B.extraHit && spiritCanBlock()) {
+      B.extraHit = 0;
+      B.spiritBlockUsed = 1;
+      flashBattleNote('旧影替你挡了这一下 —— 下次自己来。');
+    }
+
+    /* 批 B49：记账（本场哪个知识点错得多，结算后讲那个） */
+    if (B.q && B.q.knowledge) {
+      B.knoteTally[B.q.knowledge] = (B.knoteTally[B.q.knowledge] || 0) + 1;
+      B.knoteLast = B.q.knowledge;
+    }
+
     // 装备「空白竹简」：错题本
     if (equipHasWrongbook()) {
       // 批 快改档#2：网格/分数题存 qHtml，结算错题本可渲染出框（无则回落纯文本）
@@ -22140,6 +22176,7 @@ function endBattle(win) {
      战败建议盒（result-fix）加入后一场可能有两个 learn 盒，会残留累积 */
   document.querySelectorAll('#screen-result .result-learn').forEach(function (n) { n.remove(); });
   document.querySelectorAll('#screen-result .result-drop').forEach(function (n) { n.remove(); });
+  document.querySelectorAll('#screen-result .result-knote').forEach(function (n) { n.remove(); });
 
   document.getElementById('qOpts').classList.add('hidden');
   document.getElementById('qInputArea').classList.add('hidden');
@@ -22424,6 +22461,10 @@ function endBattle(win) {
       '<br><span class="muted">' + blessGained.desc + '（不绑知识点，之后每张地图都生效）</span>';
     rlb.parentNode.insertBefore(bbox, rlb.nextSibling);
   }
+
+  /* 批 B49：本场有错、且错的知识点在讲解表里 → 回图前讲一段（一场只讲一个） */
+  B.knotePending = (B.wrongCount > 0) ? knotePickKey() : '';
+  if (B.knotePending) renderKnoteHint(B.knotePending);
 
   document.getElementById('btnAgain').textContent =
     B.kind === 'boss' ? '再挑战一次' : (remain > 0 ? '继续前进' : '挑战守律者');
@@ -25639,6 +25680,165 @@ function spiritMapClean() {
   playStory(SPIRIT_SCRIPT.clean, function () { spiritFinish(); });
 }
 
+/* =======================================================================
+   批 B49 · 旧影讲知识点（试点：三年级 10 个知识点）—— 2026-10-29
+   -----------------------------------------------------------------------
+   一句话：答错的时候旧影替你挡一下；打完回图前，它把这题背后的那个知识点讲一遍。
+
+   四条定案的规矩（改之前先读）：
+   ① **讲解不属于奖励**：没有旧影的孩子照样能听（说话人换成「引路人」）。
+      把教学内容绑在收集后面，等于让没拿到的孩子永远学不到。
+   ② **每场只讲一个**：本场错得最多的那个知识点。讲透一个比连讲五个有用。
+   ③ **正文绑知识点、不绑旧影**：74 条正文一份就够，旧影只贡献「谁来开口」。
+      否则 74 × 18 条，永远写不完也测不完。
+   ④ **旧影出手只抵惩罚**：答错本来会让怪多打一下（B.extraHit）；它出手＝这一下不挨，
+      每场一次。不改判定链（resolveAnswer 是全项目复杂度最高的函数，别往里塞逻辑）。
+   ======================================================================= */
+var KNOTE = {
+  /* ---- 三年级试点（教材口径见 KNOWLEDGE[key].bkNote）---- */
+  mulMulti: {
+    hook: '进位别丢在心里。',
+    body: [
+      '两位数乘一位数，拆成两半算：十位乘一次，个位乘一次。',
+      '比如 24 × 3：20 × 3 = 60，4 × 3 = 12，合起来 72。',
+      '个位乘出来超过十，那个十要记在心里、加到十位上 —— 最容易漏的就是它。'
+    ]
+  },
+  divMulti: {
+    hook: '从最高位开始除。',
+    body: [
+      '两位数除以一位数，先看十位；十位不够除，就和个位合起来再除。',
+      '比如 72 ÷ 3：7 ÷ 3 商 2 余 1，把 1 和 2 合成 12，12 ÷ 3 = 4，所以是 24。',
+      '余数一定要比除数小。余数大了说明商小了；除完可以用「商 × 除数 + 余数」验回去。'
+    ]
+  },
+  perimeter: {
+    hook: '周长是绕一圈。',
+    body: [
+      '周长量的是围一圈的长度，不是里面的大小 —— 里面的大小叫面积。',
+      '长方形有两条长、两条宽，所以周长 =（长 + 宽）× 2；正方形 = 边长 × 4。',
+      '单位是长度：厘米、分米、米。写成「平方厘米」，就是把周长和面积记混了。'
+    ]
+  },
+  area: {
+    hook: '面积是铺满要多少格。',
+    body: [
+      '面积问的是：这个面里能铺多少个 1 平方厘米的小方格。',
+      '长方形面积 = 长 × 宽，正方形面积 = 边长 × 边长。',
+      '两条边相乘，得到的是平方单位：平方厘米、平方分米、平方米。'
+    ]
+  },
+  unitConv: {
+    hook: '大单位换小单位，数变大。',
+    body: [
+      '长度单位按大小排：千米、米、分米、厘米、毫米；相邻两个之间都是 10 倍。',
+      '大单位换小单位要乘，小单位换大单位要除。3 分米 = 30 厘米 = 300 毫米。',
+      '只有米到千米是 1000 倍：1 千米 = 1000 米 —— 这一步最容易记成 100。'
+    ]
+  },
+  timeUnit: {
+    hook: '时间不是十进制。',
+    body: [
+      '时间用 60 进制：1 时 = 60 分，1 分 = 60 秒。',
+      '所以 2 时 30 分不是 2.30 时，是 2 时 30 分 = 2.5 时。',
+      '算经过时间用结束减开始；分钟不够减，就从前一小时借 60 分。'
+    ]
+  },
+  mulTwo: {
+    hook: '要乘两次，再错位相加。',
+    body: [
+      '两位数乘两位数，拆成两次乘：先乘个位，再乘十位。',
+      '比如 23 × 14：23 × 4 = 92，23 × 10 = 230，加起来 322。',
+      '第二行从十位开始写，末尾要空一位 —— 它代表的是「几个十」。'
+    ]
+  },
+  calendar: {
+    hook: '一三五七八十腊，三十一天永不差。',
+    body: [
+      '大月 31 天：1、3、5、7、8、10、12 月；小月 30 天：4、6、9、11 月。',
+      '二月最特殊：平年 28 天，闰年 29 天；所以平年 365 天、闰年 366 天。',
+      '判断闰年：年份能被 4 整除就是闰年，但整百年要能被 400 整除才算。'
+    ]
+  },
+  direction8: {
+    hook: '上北下南，左西右东。',
+    body: [
+      '地图上的方向是固定的：上北、下南、左西、右东。',
+      '方向会跟着人转：面朝北时右手是东；转 90° 面朝东，右手就变成南。',
+      '相反方向成对记：东对西、南对北、东南对西北、东北对西南。'
+    ]
+  },
+  twoWayTable: {
+    hook: '一栏男生，一栏女生。',
+    body: [
+      '复式统计表是把两张单式表合成一张：行写项目，列分成男生、女生。',
+      '读表先看表头：这一列是谁的，这一行是什么项目 —— 看错表头是最大的错源。',
+      '要「一共」就把两栏相加，要「多几人」就相减；合计那一行每一列都该对得上。'
+    ]
+  }
+};
+
+/* 现在该由谁开口讲：手上有旧影 → 用它的化名；没有 → 引路人。
+   注意：这里只用「名字」，不判断它在不在台上 —— 台上不站人（见 stageAppearance）。 */
+function knoteSpeaker() {
+  try {
+    var owned = (G.spirit && G.spirit.owned) || [];
+    if (owned.length) {
+      var last = owned[owned.length - 1];
+      if (last && last.name) return last.name;
+    }
+  } catch (e) {}
+  return '引路人';
+}
+
+/* 把「引子 + 三条正文」拼成一段戏；没有这条知识点的讲解就返回 null */
+function knoteLines(key) {
+  var rec = KNOTE[key];
+  if (!rec) return null;
+  var who = knoteSpeaker();
+  var out = [{ who: who, text: rec.hook }];
+  for (var i = 0; i < rec.body.length; i++) out.push({ who: who, text: rec.body[i] });
+  return out;
+}
+
+/* 本场错得最多的知识点（并列时取最后错的那个）—— 一场只讲一个 */
+function knotePickKey() {
+  var t = B.knoteTally || {}, best = '', bestN = 0;
+  for (var k in t) {
+    if (!Object.prototype.hasOwnProperty.call(t, k)) continue;
+    if (!KNOTE[k]) continue;                 /* 试点外的知识点先不打扰 */
+    if (t[k] > bestN) { bestN = t[k]; best = k; }
+    else if (t[k] === bestN && k === B.knoteLast) { best = k; }
+  }
+  return best;
+}
+
+/* 旧影能不能替你挡这一下：要有旧影、每场一次、不是练习阁 */
+function spiritCanBlock() {
+  try {
+    if (B.kind === 'practice') return false;
+    if (B.spiritBlockUsed) return false;
+    var owned = (G.spirit && G.spirit.owned) || [];
+    return owned.length > 0;
+  } catch (e) { return false; }
+}
+
+/* 结算页那一行提示：让「回图时会讲一段」不是突然出现的 */
+function renderKnoteHint(key) {
+  var box = document.querySelector('#screen-result .result-box');
+  if (!box || !key || !KNOTE[key]) return;
+  var kid = KNOWLEDGE[key];
+  var el = document.createElement('div');
+  el.className = 'result-knote';
+  el.innerHTML = '<b>' + escHtml(knoteSpeaker()) + '</b> 想讲一句 · ' +
+                 escHtml(kid ? kid.label : key) + '<span class="rk-tip">点「回到地图」时讲</span>';
+  /* 插在按钮**上面**：放在按钮下面的话，孩子会先点走、再也不会看它一眼 */
+  var btn = document.getElementById('btnAgain');
+  var row = btn ? btn.parentNode : null;
+  if (row && row.parentNode === box) box.insertBefore(el, row);
+  else box.appendChild(el);
+}
+
 /* ---------- 掉落（批 A4）：数域越靠后，药品 / 增益越好 ---------- */
 /* ---------- 装备生成与背包 API（批 A5） ---------- */
 var GEAR_BAG_CAP = 40;   // 背包装备上限，满了自动折半卖成算珠
@@ -26367,6 +26567,7 @@ document.addEventListener('keydown', function (e) {
 /* ---------- 结算按钮 ---------- */
 document.getElementById('btnAgain').onclick = function () {
   var z = B.zone, k = B.kind, won = B.won;
+  B.knotePending = '';   /* 批 B49：再战就不讲了，别让它悬到下一场 */
   // 批 E0：练习阁——同一组知识点再练一遍
   if (k === 'practice') { startPractice(); return; }
   /* 批 C6-b：裂隙守关者胜利 → 掉落已领，出裂隙回世界图 */
@@ -26398,6 +26599,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.14.0", d: "10-29", one: "答错时旧影替你挡一下；打完把这题背后的知识点讲一遍（三年级 10 个）", notes: ["现在你手上有旧影了。战斗中第一次答错，它会替你挡掉那一下 —— 每场只挡一次，挡完那句写得很直：「下次自己来。」","打完点「回到地图」，它会讲一段：只讲这道题背后的那个知识点，四句话，不针对你错的那一道。讲透一个，比连讲五个有用。","一场只讲一个。要是这局错了三个知识点，它挑错得最多的那个讲。","结算页会先出现一行小字告诉你：谁要讲、讲哪个 —— 不至于点了按钮突然冒出一段戏。","这一段不是奖励。「听讲解」这件事跟有没有旧影无关：没有旧影的孩子，同样的讲解由书院的引路人讲。","这一版先做三年级 10 个知识点（两位数乘一位数、两位数除以一位数、长方形周长、长方形面积、单位换算、时分秒换算、两位数乘两位数、年月日、位置与方向、复式统计表）。其余年级陆续补。"] },
   { v: "v1.13.0", d: "10-29", one: "大地图多一格「旧影台」：一场打不完的仗，倒下那刻它接手", notes: ["通关任意一个数域之后，世界图上多出一格「旧影台」。","进去那只影子怎么也打不完：血条厚得不讲道理。你先答对八道，它就在旁边看着。","等你真的撑不住、血被打空的那一刻，它现身，讲完自己为什么留在这里，然后替你收场，留下一缕给你。","一路答对也不用担心：答到十二道，它会说「这一程你没让我出手」，照样把灯留下。两种走法都拿得到 —— 不用为了看它而故意答错。","拿到的那一位会记在旧影台里。这一版它还不进裂隙，那一步放在下一批。"] },
   { v: "v1.12.0", d: "10-29", one: "裂隙残血时会有「先来过的人」替你削一刀、挡半刀", notes: ["打数境裂隙时，血掉到三成以下，隙缝里会探出一道影子——那是以前打过这里的同龄孩子留下的。它替你削掉敌人一刀（约 6% 血），并替你挡掉下一次伤害的一半。","一位前辈每场只出现一次。而且它不抢你的最后一击：哪怕那一刀够把怪打死，也会给怪留一口气，收尾永远留给你。","它说的话都很短，比如「这道我卡过三回，第四回就通了」「慢一点，没人催你」——你只会遇到同年级的人。","只在裂隙生效。主线和野图没有——那里还没有「别人来过」的痕迹。"] },
   { v: "v1.11.1.1", d: "10-29", one: "成就页那句说明补上「集齐 13 枚再得 1 张心愿卡」", notes: ["成就页顶部那条总进度条旁边，现在写清了终点：13 枚集齐，会再得 1 张心愿卡。这条信息本来只在书院心愿匣里提过一句，孩子在成就页看不到。","13 枚真的收齐时，这句会换成「全部点亮 —— 集齐奖励：1 张心愿卡」，从「承诺」变成「告知」。","句子里的「13」是按成就条数算出来的，以后加成就它会自己跟着变。"] },
@@ -26473,14 +26675,14 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.13.0',
+  ver: 'v1.14.0',
   date: '2026-10-29',
-  one: '大地图多了一格「旧影台」：一场打不完的仗，撑到倒下时有人接手。',
+  one: '答错时旧影替你挡一下；打完它把这题背后的道理讲一遍。',
   items: [
-    '通关任意一个数域后，世界图上会多出一格「旧影台」。进去以后会发现，那只影子怎么也打不完——它的血条厚得不讲道理。',
-    '你先答对八道，它就在旁边看着。等你真的撑不住、血被打空的那一刻，它会现身，讲完自己为什么留在这里，然后替你收场。',
-    '一路答对也没关系：答到十二道，它会说「这一程你没让我出手」，照样把灯留给你。两种走法都拿得到，不用为了看它而故意答错。',
-    '拿到的那一位会记在旧影台里。这一版它还不进裂隙——那一步放在下一批。'
+    '现在你有旧影了。战斗中第一次答错，它会替你挡掉那一下——每场只挡一次，挡完那句写得很直：「下次自己来。」',
+    '打完点「回到地图」，它会讲一段：只讲这道题背后那个知识点，四句话，不针对你错的那一道。讲透一个比连讲五个有用。',
+    '一场只讲一个。要是这局错了三个知识点，它挑错得最多的那个讲。',
+    '这一段不是奖励。「听讲解」这件事跟有没有旧影无关：没有旧影的孩子，同样的讲解由书院的引路人讲。'
   ]
 };
 
@@ -26643,6 +26845,19 @@ function closeUpdLog() {
 })();
 document.getElementById('btnBackMap').onclick = function () {
   var z = B.zone, k = B.kind, won = B.won;
+  /* 批 B49：旧影讲这道题背后的知识点 —— 播完再走一遍本流程（此时 pending 已清空）。
+     守律者胜利且结局剧情还没播时让路：两段戏连着播会挤在一起。 */
+  if (B.knotePending && !(k === 'boss' && won && !z._endPlayed)) {
+    var _kl = knoteLines(B.knotePending);
+    B.knotePending = '';
+    if (_kl) {
+      playStory(_kl, function () {
+        try { show('screen-result'); } catch (e) {}
+        document.getElementById('btnBackMap').onclick();
+      });
+      return;
+    }
+  }
   if (k === 'practice') {
     // 从哪儿来回哪儿去：探索中进来的回探索，否则回世界图
     leavePractice();
