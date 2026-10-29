@@ -1057,6 +1057,20 @@
      一句话塞进 2×2 的小格子会被折成竖排（667×375 实测一句话折成五行），读不成句。
      超过 8 个字的选项一律改单列、左对齐、字号降一档。 */
   .q-opts.long { grid-template-columns: 1fr; gap: 0.375rem; }
+  /* 批 B54：整句辨析题改成「题干在上、选项在下」。
+     原来两栏是「题干左 27rem / 选项右 15rem」—— 那是为数字和符号设计的分栏，
+     18 个字的整句塞进 268px 会被折成两行（桌面端截图里「…的是 / 双数」被切断），
+     读起来像半句话。上下布局让一句话占一行。只在这一类题上生效，其它题型零影响。 */
+  .q-cols.say-mode { flex-direction: column; align-items: stretch; justify-content: center; gap: 0.625rem; }
+  .q-cols.say-mode .q-left {
+    flex: 0 0 auto; overflow: visible; padding-right: 0;
+  }
+  .q-cols.say-mode .q-left::before,
+  .q-cols.say-mode .q-left::after { content: none; }
+  .q-cols.say-mode .q-text { text-align: center; }
+  .q-cols.say-mode .q-right {
+    flex: 0 1 auto; width: 100%; max-width: 34rem; margin: 0 auto; justify-content: flex-start;
+  }
   .q-opts.long .q-opt {
     text-align: left; font-weight: normal; line-height: 1.5;
     font-size: 0.9375rem; padding: 0.5rem 0.75rem;
@@ -3174,7 +3188,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.16.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.16.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4156,7 +4170,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.16.0
+   数境之旅 · 原型 v1.16.1
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -7846,19 +7860,168 @@ var __DECL = {
         ]
       },
       {
+        "id": "t1_pos",
+        "n": "数位顺序",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "从右边起，第一位是 □ 位。",
+        "ans": "'个'",
+        "type": "choice",
+        "options": [
+          "个",
+          "十",
+          "百"
+        ]
+      },
+      {
+        "id": "t1_tens",
+        "n": "十几的组成",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "13 里面有 1 个十和 □ 个一。",
+        "ans": "'3'",
+        "type": "choice",
+        "options": [
+          "1",
+          "3",
+          "13"
+        ]
+      },
+      {
+        "id": "t1_make",
+        "n": "凑十法先凑几",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "凑十法：先把一个数拆开，凑出 □，再加剩下的。",
+        "ans": "'10'",
+        "type": "choice",
+        "options": [
+          "5",
+          "10",
+          "20"
+        ]
+      },
+      {
+        "id": "t1_side",
+        "n": "正方形有几条边",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个正方形有 □ 条边。",
+        "ans": "'4'",
+        "type": "choice",
+        "options": [
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "id": "t1_face",
+        "n": "正方体有几个面",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个正方体有 □ 个面。",
+        "ans": "'6'",
+        "type": "choice",
+        "options": [
+          "4",
+          "6",
+          "8"
+        ]
+      },
+      {
+        "id": "t2_size",
+        "n": "谁说得对（比大小）",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "比大小时，哪一句说法是对的？",
+        "ans": "'两位数一定比一位数大'",
+        "type": "choice",
+        "options": [
+          "两位数一定比一位数大",
+          "一位数一定比两位数大",
+          "比大小时要从个位比起",
+          "位数相同时个位大的就大"
+        ]
+      },
+      {
         "id": "t2_shape",
-        "n": "谁说得对（图形）",
+        "n": "谁说得对（正方形）",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "关于正方形，哪一句说法是对的？",
+        "ans": "'正方形的四条边一样长'",
+        "type": "choice",
+        "options": [
+          "正方形的四条边一样长",
+          "长方形的四条边一样长",
+          "正方形有 3 条边",
+          "正方形的四个角不一样大"
+        ]
+      },
+      {
+        "id": "t1_swap",
+        "n": "交换加数的位置",
         "kind": "arith",
         "hard": true,
         "vars": {},
-        "tpl": "下面哪一句是对的？",
-        "ans": "'长方形有 4 条边'",
+        "tpl": "两个数相加，交换它们的位置，得数 □。",
+        "ans": "'不变'",
         "type": "choice",
         "options": [
-          "长方形有 4 条边",
-          "长方形有 3 条边",
-          "正方形有 5 条边",
-          "圆有 4 个角"
+          "不变",
+          "变大",
+          "变小"
+        ]
+      },
+      {
+        "id": "t2_even",
+        "n": "谁说得对（单双数）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "关于单双数，哪一句说法是对的？",
+        "ans": "'个位是 0、2、4、6、8 的是双数'",
+        "minD": 1,
+        "type": "choice",
+        "options": [
+          "个位是 0、2、4、6、8 的是双数",
+          "个位是 1、3、5、7、9 的是双数",
+          "十位是 0、2、4、6、8 的是双数",
+          "双数一定比单数大"
+        ]
+      },
+      {
+        "id": "t2_class",
+        "n": "谁说得对（分类）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "关于分类，哪一句说法是对的？",
+        "ans": "'每样东西只能放进一个圈里'",
+        "minD": 1,
+        "type": "choice",
+        "options": [
+          "每样东西只能放进一个圈里",
+          "分完各堆加起来比原来少",
+          "同一堆东西只能按一种标准分",
+          "分成几类，每类的东西一定一样多"
+        ]
+      },
+      {
+        "id": "t2_ball",
+        "n": "谁说得对（球和圆柱）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "关于立体图形，哪一句是对的？",
+        "ans": "'球不管怎么放都能滚'",
+        "type": "choice",
+        "options": [
+          "球不管怎么放都能滚",
+          "圆柱不管怎么放都能滚",
+          "长方体的面都是正方形",
+          "球有 6 个面"
         ]
       }
     ]
@@ -14459,7 +14622,17 @@ var KNOWLEDGE = {
     bkNote: "",
     variants: [
       { id: "t1_ten", n: "十里有几个一", gen: function (d) { return __dg(__DECL["sayG1"].variants[0], d); } },
-      { id: "t2_shape", n: "谁说得对（图形）", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[1], d); } }
+      { id: "t1_pos", n: "数位顺序", gen: function (d) { return __dg(__DECL["sayG1"].variants[1], d); } },
+      { id: "t1_tens", n: "十几的组成", gen: function (d) { return __dg(__DECL["sayG1"].variants[2], d); } },
+      { id: "t1_make", n: "凑十法先凑几", gen: function (d) { return __dg(__DECL["sayG1"].variants[3], d); } },
+      { id: "t1_side", n: "正方形有几条边", gen: function (d) { return __dg(__DECL["sayG1"].variants[4], d); } },
+      { id: "t1_face", n: "正方体有几个面", gen: function (d) { return __dg(__DECL["sayG1"].variants[5], d); } },
+      { id: "t2_size", n: "谁说得对（比大小）", gen: function (d) { return __dg(__DECL["sayG1"].variants[6], d); } },
+      { id: "t2_shape", n: "谁说得对（正方形）", gen: function (d) { return __dg(__DECL["sayG1"].variants[7], d); } },
+      { id: "t1_swap", n: "交换加数的位置", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[8], d); } },
+      { id: "t2_even", n: "谁说得对（单双数）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG1"].variants[9], d); } },
+      { id: "t2_class", n: "谁说得对（分类）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG1"].variants[10], d); } },
+      { id: "t2_ball", n: "谁说得对（球和圆柱）", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[11], d); } }
     ]
   },
   sayG2: {
@@ -16228,6 +16401,19 @@ function makeQuestion(knowledgeKey, forceType, lv, noCustom, poolMode) {
         ns.push(vv);
       }
       if (ns.length) pool0 = ns;
+    }
+    /* 批 B54：变式下限档 minD —— 给「整句辨析」这类静态题用。
+       ⛔ 为什么需要它：静态题没有随机参数，d 档调不出任何差别（实测 d0/d1/d2 出的是同一批题），
+       于是「一年级基础档先别出读四句的长题」这件事就无从实现 —— 只能靠 hard，
+       而 hard 管的是裂隙提权，不是「这个档能不能出」。
+       声明 minD:1 的变式只从标准档（d≥1）起出现；未声明的一律视为 0，
+       所以对其它 370 多条变式**零影响**（0 <= d 恒真）。 */
+    if (typeof d === 'number') {
+      var mdPool = [];
+      for (var mdi = 0; mdi < pool0.length; mdi++) {
+        if ((pool0[mdi].minD || 0) <= d) mdPool.push(pool0[mdi]);
+      }
+      if (mdPool.length) pool0 = mdPool;   // 防御：全被过滤就不过滤，绝不空池
     }
     var qpool = [];
     for (var pi = 0; pi < pool0.length; pi++) {
@@ -19505,6 +19691,12 @@ function showNewQGate(go) {
 function nextRound() {
   if (!B.active) return;
   hideVerdict();          // 出下一题前收掉上一题的判定浮层
+  /* 批 B54：长选项题的「上下布局」是**逐题**决定的，这里每题先清一次。
+     ⛔ 不清的后果：上一题是整句辨析（say-mode）、下一题是填空题（数字键盘），
+     两栏容器还保持着上下单列，键盘和格子会被拉成一条 —— 而只有这一种顺序才会踩到，
+     随机出题时大约每七八题一次，肉眼很难复现。 */
+  var _qcolsReset = document.getElementById('qCols');
+  if (_qcolsReset) _qcolsReset.classList.remove('say-mode');
   // 清掉可能残留的「星尘遮蔽」（上一场战斗若在 1.5 秒内结束，类名会跨战斗残留）
   document.getElementById('qOpts').classList.remove('veiled');
   document.getElementById('qPad').classList.remove('veiled');
@@ -19670,6 +19862,10 @@ function nextRound() {
     var _maxOptLen = 0;
     q.options.forEach(function (o) { _maxOptLen = Math.max(_maxOptLen, String(o).length); });
     optsEl.classList.toggle('long', _maxOptLen > 8);
+    /* 同一件事的布局面：长选项要连两栏结构一起换（见 .q-cols.say-mode），
+       否则只改列数不顶用 —— 右栏还是 15rem。 */
+    var _colsEl = document.getElementById('qCols');
+    if (_colsEl) _colsEl.classList.toggle('say-mode', _maxOptLen > 8);
     q.options.forEach(function (o) {
       var b = document.createElement('button');
       b.className = 'q-opt';
@@ -27557,6 +27753,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.16.1", d: "10-29", one: "说法题一年级补满 12 道；长句改上下排；基础档先不出长题", notes: ["一年级的说法题补满了：六道让你挑符号（长方形的面积 = 长 □ 宽 那种），六道让你从四句说法里挑出对的那一句。","那三句错话不是随便编的——一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","长句题换了排法：题干在上、四个选项在下，一句一行。以前挤在右边那一条窄栏里，一句话被切成两截，像断句。","还有一处看不见的：刚进一个图、手感还没上来时（基础档）先不给你出要读四句的长题；连对几道升上来，它才出现。"] },
   { v: "v1.16.0", d: "10-29", one: "新增题型「定理与定律」：不给你数算，问哪一句说法是对的（每级 2 道）", notes: ["每个年级的数域里多了一个知识点「定理与定律」。题长得跟以前不一样：不给你数算，而是问「下面哪一句是对的」，四个选项都是这个年级学过的说法，只有一句没错。","还有一类是挖掉一个成分：长方形的面积 = 长 □ 宽，让你挑那个符号。这类一眼能答，用来先把概念稳住。","选项里的错句不是随便编的，各自对应一种典型混淆：把周长写成面积、把单位换算写成 10 倍、把正方形当成长方形。你选哪个，就露了哪一处没记牢。","这一版每个年级先放 2 道，把题型和排版跑通；后面补齐到每级 12 道。"] },
   { v: "v1.15.2", d: "10-29", one: "练习阁多了「听过的讲解」，讲过的能按年级翻出来重听", notes: ["练习阁底下多了一行「听过的讲解」，后面跟着数字，那是你已经听过几条。点开按年级翻，挑一条重听。","重听给的是完整四句，不是后来那两句提醒——你专门点开来听，就不该只给半段。","只列讲过的。没听过的不会出现在这里：这里不是第二个课堂，是复习的地方。","听完直接回练习阁，不用折回地图。"] },
   { v: "v1.15.1", d: "10-29", one: "引路人换了成人相；同一知识点讲过只讲两句；讲解可跳过", notes: ["讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。","同一个知识点第一次讲四句，之后再错到它只讲两句——先用一句说清是什么，不再把同一段当噪音放第三遍。","讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。"] },
@@ -27637,14 +27834,14 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.16.0',
+  ver: 'v1.16.1',
   date: '2026-10-29',
-  one: '多了一种题型：「定理与定律」——考的不是算得快，是课本上那句话怎么说的。',
+  one: '「定理与定律」一年级从 2 道补到 12 道，够出了。',
   items: [
-    '每个年级的数域里多了一个知识点「定理与定律」。题长得跟以前不一样：不给你数算，而是问「下面哪一句是对的」，四个选项都是这个年级学过的说法，只有一句没错。',
-    '还有一类是挖掉一个成分：长方形的面积 = 长 □ 宽，让你挑那个符号。这类一眼能答，用来先把概念稳住。',
-    '选项里的错句不是随便编的，各自对应一种典型混淆：把周长写成面积、把单位换算写成 10 倍、把正方形当成长方形。你选哪个，就露了哪一处没记牢。',
-    '这一版每个年级先放了 2 道，把题型和排版跑通；后面会补齐到每级 12 道。'
+    '一年级的说法题补满了：六道让你挑符号（长方形的面积 = 长 □ 宽 那种），六道让你从四句说法里挑出对的那一句。',
+    '那三句错话不是随便编的 —— 一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。',
+    '长句题换了排法：题干在上、四个选项在下，一句一行。以前挤在右边那一条窄栏里，一句话被切成两截，像断句。',
+    '还有一处看不见的：刚进一个图、手感还没上来时（基础档）先不给你出要读四句的长题；连对几道升上来，它才出现。'
   ]
 };
 
