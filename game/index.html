@@ -2239,6 +2239,17 @@
   .ip-n { margin-left: auto; font-size: 0.6875rem; color: #ffe08a; flex: 0 0 auto; }
   .item-pop-tip { font-size: 0.625rem; color: #7f8fa8; margin: 2px 0 4px; }
   .skill-bar .item-btn { margin-left: 0; white-space: nowrap; }   /* 批 E4：窄屏不许把「行囊」折成两行 */
+  /* 批 B47：英灵旁白专用 —— 复用 .bt-note 的观感，但①只出现一条②允许换行③挪到战斗区上部
+     （通用 .bt-note 是「单行短句」假设，两条同时出现会精确叠在同一点，长句还会压住技能栏）*/
+  .bt-note.spirit-note {
+    top: 54px; bottom: auto; max-width: min(88%, 560px);
+    white-space: normal; text-align: center; line-height: 1.55;
+    border-color: #9ad0ff; color: #dceeff; background: rgba(14,26,48,.94);
+    animation: spiritIn .26s ease-out;
+  }
+  .bt-note.spirit-note .sp-who { display: block; color: #9ad0ff; font-size: 0.6875rem; letter-spacing: 1px; }
+  .bt-note.spirit-note .sp-line { display: block; margin-top: 3px; }
+  @keyframes spiritIn { from { opacity: 0; transform: translateX(-50%) translateY(-6px); } to { opacity: 1; transform: translateX(-50%); } }
   .bt-note {
     position: absolute; left: 50%; transform: translateX(-50%);
     bottom: calc(var(--consoleH, 38%) + 16px);
@@ -3080,7 +3091,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.11.1.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.12.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4042,7 +4053,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.11.1.1
+   数境之旅 · 原型 v1.12.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -21136,6 +21147,8 @@ function enemyTurn() {
     if (isBossFight()) dmg = Math.round(dmg * (1 + 0.15 * (B.boss.seg - 1)));
     // 答错追加的猛攻
     if (extraStrong) dmg = Math.round(dmg * 1.6);
+    // 批 B47：英灵刚出手时留下的护持 —— 下一次受击减半（只一次）
+    if (B.spiritGuard) { dmg = Math.round(dmg * 0.5); B.spiritGuard = 0; }
     // 韧性：受击减伤（每点 0.5%，上限 25%）
     dmg = Math.round(dmg * (1 - dmgReduce()));
     // 被动「进位警觉」：再减 10%
@@ -21205,6 +21218,8 @@ function enemyTurn() {
       showFloat('+' + h2, 'heal-num', 'enemy');
     }
     updateHPBars();
+    /* 批 B47：裂隙残血 → 前辈出手（每场一次，只削血不抢最后一击） */
+    maybeSpiritHelp();
 
     setTimeout(function () {
       if (B.hero.hp <= 0) { handleHeroDown(); return; }
@@ -25327,6 +25342,122 @@ function flashBattleNote(msg) {
   setTimeout(function () { if (el.parentNode) el.remove(); }, 2000);
 }
 
+/* =======================================================================
+   批 B47 · 英灵援军（A 档：本地前辈）—— 2026-10-29
+   -----------------------------------------------------------------------
+   一句话：在裂隙里残血时，一道「先来过这里的人」的影子替你削一刀、再挡半刀。
+
+   ⛔ 为什么不是联网版（原 P3~P5）：那个方案的价值全部来自「别人的英灵」，
+   而现在真实玩家几乎只有一个人 —— 池子必然是空的，拉取永远回退预置池。
+   也就是说：**此刻联网版的观感 = 预置前辈版**，却要多付 BaaS、未成年人数据、
+   以及打破「零外部请求」声明这三笔账。所以先做「魂」（异步互助的感觉），
+   把「壳」（联网拉取）留到有社群再说。
+
+   于是这里的 SPIRITS 刻意按原方案的**快照最小集**定义字段
+   （grade / alias / phrase，未来还有 level / loadout / version）：
+   将来接后端时，只是把「从本地数组抽一条」换成「从接口取一条」，其余不动。
+   ======================================================================= */
+var SPIRITS = [
+  /* 一年级 */
+  { alias: '青禾', grade: 1, phrase: '别怕，慢慢数手指也算数。' },
+  { alias: '小满', grade: 1, phrase: '我上次也在这儿摔了一跤。' },
+  { alias: '阿豆', grade: 1, phrase: '这题我数错了三回。' },
+  /* 二年级 */
+  { alias: '阿竹', grade: 2, phrase: '先看个位，别急着进十。' },
+  { alias: '石头', grade: 2, phrase: '算错了不要紧，你还在呢。' },
+  { alias: '小禾', grade: 2, phrase: '我也怕过，后来就不怕了。' },
+  /* 三年级 */
+  { alias: '砚秋', grade: 3, phrase: '乘法表背到七就够用了。' },
+  { alias: '豆子', grade: 3, phrase: '这道我卡过三回，第四回就通了。' },
+  { alias: '小年', grade: 3, phrase: '慢一点，没人催你。' },
+  /* 四年级 */
+  { alias: '南枝', grade: 4, phrase: '除法先看最高位，别从头除。' },
+  { alias: '长庚', grade: 4, phrase: '通分先找最小公倍数。' },
+  { alias: '阿砚', grade: 4, phrase: '错一次不算什么。' },
+  /* 五年级 */
+  { alias: '望川', grade: 5, phrase: '统计图先读轴，再看柱子。' },
+  { alias: '小鹿', grade: 5, phrase: '别慌，你已经在第五域了。' },
+  { alias: '石川', grade: 5, phrase: '我也摔过，爬起来接着走。' },
+  /* 六年级 */
+  { alias: '玄序', grade: 6, phrase: '这一步我当年想了很久。' },
+  { alias: '归舟', grade: 6, phrase: '走到这里，你已经比很多人远了。' },
+  { alias: '阿墨', grade: 6, phrase: '最后一段最难，也最短。' }
+];
+
+/* 抽一条「同年级或更早」的前辈 —— 六年级的孩子也该遇到同龄人，一年级不遇到六年级 */
+function spiritPick(grade) {
+  var g = Math.max(1, Math.min(6, grade || (G.player && G.player.grade) || 1));
+  /* ⛔ 只抽**同年级**。第一版还允许「更早年级」进来，实测一个三年级孩子撞见
+     一年级的影子对他说「慢慢数手指也算数」—— 那是降智，不是安慰。
+     「前辈」= 先来过这里的人，不等于年级比我高；同龄人才说得上话。
+     兜底只防「某年级台词被删空」，正常不会走到。 */
+  var same = SPIRITS.filter(function (x) { return x.grade === g; });
+  if (same.length) return same[Math.floor(Math.random() * same.length)];
+  var near = SPIRITS.slice().sort(function (a, b) {
+    return Math.abs(a.grade - g) - Math.abs(b.grade - g);
+  });
+  return near[0];
+}
+
+/* 该不该有前辈出手？四道门都必须过 */
+function spiritShouldHelp() {
+  if (!B || !B.active || !B.zone) return false;
+  if (!B.zone.rift) return false;                    /* 只在裂隙 */
+  if (B.kind === 'practice') return false;
+  if (B.spiritUsed) return false;                    /* 每场一次 */
+  if (!B.hero || !B.enemy) return false;
+  if (B.hero.maxHp <= 0) return false;
+  if (B.hero.hp / B.hero.maxHp > 0.3) return false;   /* 残血线：30% */
+  if (B.enemy.hp <= 1) return false;                 /* 怪只剩一口气时不抢你的最后一击 */
+  /* ⛔ 让一让：残血时「血量危急 · 要不要吃药」的弹框也会在这一刻出现（<20%，每题一次）。
+     两个东西同时抢画面 → 弹框把影子挡在外面，看着像 bug。有弹框就等下一回合再说，
+     孩子不吃药、接着挨打，下一回合还会来。 */
+  var cb = document.getElementById('confirmBox');
+  if (cb && !cb.classList.contains('hidden')) return false;
+  return true;
+}
+
+/* 前辈出手：削一刀（按敌方最大血的 6%）+ 记一次「挡半刀」，本场一次 */
+function spiritHelp() {
+  var sp = spiritPick((B.zone && B.zone.grade) || (G.player && G.player.grade));
+  B.spiritUsed = 1;
+  var dmg = Math.round(B.enemy.maxHp * 0.06);
+  if (dmg < 1) dmg = 1;
+  /* 不抢最后一击：至少给敌人留 1 点血 */
+  if (dmg > B.enemy.hp - 1) dmg = B.enemy.hp - 1;
+  if (dmg < 1) dmg = 1;
+  B.enemy.hp = Math.max(0, B.enemy.hp - dmg);
+  B.spiritGuard = 1;                                  /* 下一次受击减半 */
+  try { Audio2.chord(); } catch (e) {}
+  spiritNote(sp.alias, sp.grade, sp.phrase);
+  showFloat('-' + dmg, 'crit-num', 'enemy');
+  shakeEnemy();
+  if (typeof updateHPBars === 'function') updateHPBars();
+}
+
+/* 英灵旁白：一条元素两行（谁 + 说了什么），避免两条 flashBattleNote 精确重叠 */
+function spiritNote(alias, grade, phrase) {
+  var f = document.getElementById('btField');
+  if (!f) return;
+  var old = f.querySelector('.bt-note.spirit-note');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  var el = document.createElement('div');
+  el.className = 'bt-note spirit-note';
+  el.innerHTML = '<span class="sp-who">隙缝里的影子 · ' + escHtml(alias) + '（' + grade + ' 年级）</span>' +
+                 '<span class="sp-line">「' + escHtml(phrase) + '」</span>';
+  f.appendChild(el);
+  setTimeout(function () { if (el.parentNode) el.remove(); }, 3400);
+}
+
+/* 敌方回合末尾调用：满足条件就让前辈出手 */
+function maybeSpiritHelp() {
+  try {
+    if (!spiritShouldHelp()) return false;
+    spiritHelp();
+    return true;
+  } catch (e) { return false; }   /* 彩蛋性质，出错绝不打断战斗 */
+}
+
 /* ---------- 掉落（批 A4）：数域越靠后，药品 / 增益越好 ---------- */
 /* ---------- 装备生成与背包 API（批 A5） ---------- */
 var GEAR_BAG_CAP = 40;   // 背包装备上限，满了自动折半卖成算珠
@@ -26086,6 +26217,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.12.0", d: "10-29", one: "裂隙残血时会有「先来过的人」替你削一刀、挡半刀", notes: ["打数境裂隙时，血掉到三成以下，隙缝里会探出一道影子——那是以前打过这里的同龄孩子留下的。它替你削掉敌人一刀（约 6% 血），并替你挡掉下一次伤害的一半。","一位前辈每场只出现一次。而且它不抢你的最后一击：哪怕那一刀够把怪打死，也会给怪留一口气，收尾永远留给你。","它说的话都很短，比如「这道我卡过三回，第四回就通了」「慢一点，没人催你」——你只会遇到同年级的人。","只在裂隙生效。主线和野图没有——那里还没有「别人来过」的痕迹。"] },
   { v: "v1.11.1.1", d: "10-29", one: "成就页那句说明补上「集齐 13 枚再得 1 张心愿卡」", notes: ["成就页顶部那条总进度条旁边，现在写清了终点：13 枚集齐，会再得 1 张心愿卡。这条信息本来只在书院心愿匣里提过一句，孩子在成就页看不到。","13 枚真的收齐时，这句会换成「全部点亮 —— 集齐奖励：1 张心愿卡」，从「承诺」变成「告知」。","句子里的「13」是按成就条数算出来的，以后加成就它会自己跟着变。"] },
   { v: "v1.11.1", d: "10-29", one: "成就页顶上多了一条总进度条，收齐几枚一眼看得见", notes: ["人物 → 成就，原来顶上只有一行「已达成 3 / 13（23%）」，得读数字才知道进度。现在这行下面多了一条横贯面板的细条，攒几枚就亮几成。","这条比下面每一枚自己的小条要粗一点（8px），并且外面有一圈暗描边，所以不会和「这一枚还差多少」混在一起。","13 枚全收齐时，整条会转成金色 —— 和单条成就达成时的颜色一样，不用再数还剩几个。"] },
   { v: "v1.11.0", d: "10-28", one: "首页右下角的版本号能点开看最近三版；设置里能看完整公告", notes: ["标题屏右下角的版本号点一下，会弹出一张小卡：最近三个版本、各自改了什么，再点一下就收起来。以前点它是弹一个小提示框，只有当前这一版，看着挤。","设置里多了一行「版本更新」，点开是完整公告 —— 从 10-09 动工那天到今天，六十多个版本全在里面，点任一版能看到那一版具体改了哪几条。","公告内容不是手抄的，是从每版都在写的更新公告文档里自动生成的，所以以后发版不会漏、也不会写得跟文档对不上。"] },
@@ -26159,13 +26291,13 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.11.1.1',
+  ver: 'v1.12.0',
   date: '2026-10-29',
-  one: '成就页顶上那句说明，补上了「集齐 13 枚能换什么」。',
+  one: '裂隙里快撑不住的时候，会有「先来过这里的人」替你削一刀。',
   items: [
-    '成就页顶部新增的那条总进度条，现在旁边写清了终点：13 枚集齐，会再得 1 张心愿卡。以前这条信息只在书院心愿匣里提过一句，孩子在成就页看不到。',
-    '13 枚真的收齐时，这句会换成「全部点亮 —— 集齐奖励：1 张心愿卡」，从「承诺」变成「告知」。',
-    '句子里的「13」不是写死的，是按成就条数自动算的 —— 以后加成就，这里会跟着变。'
+    '在数境裂隙里，血掉到三成以下时，隙缝里会探出一道影子——那是以前打过这里的孩子留下的，它替你削掉敌人一刀（约 6% 血），还替你挡掉下一次伤害的一半。',
+    '一位前辈每场只出现一次，而且不会抢你的最后一击：哪怕它那一刀足够打死怪，也会给怪留一口气，收尾永远留给你。',
+    '这条只在裂隙生效。主线和野图不会有——那里没有「别人来过」的痕迹。'
   ]
 };
 
