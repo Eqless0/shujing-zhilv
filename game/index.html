@@ -2683,6 +2683,51 @@
   .pract-box { width: min(38rem, 94%); text-align: left; }
   .pract-box .confirm-title { text-align: center; }
   .pract-sub { font-size: 0.75rem; color: #cfd9ea; text-align: center; line-height: 1.8; margin-bottom: 10px; }
+  /* 批 B52：练习阁里的「听过的讲解」入口 —— 一行细长按钮，不抢「开始练习」的注意力 */
+  .pract-knote-line {
+    display: block; width: 100%; margin: 8px 0 2px; padding: 7px 10px;
+    background: #0f1b2e; border: 1px solid #2c3a5c; border-radius: 6px;
+    color: #b9cde8; font-family: inherit; font-size: 0.8125rem; cursor: pointer;
+    letter-spacing: .5px; text-align: center;
+  }
+  .pract-knote-line:hover { border-color: #4a6a8c; color: #dceeff; }
+  /* 短屏（667×375 这类）：练习阁本来就顶着上下边，再加一行就把「开始练习」挤出屏幕。
+     实测 667×375 加这一行前按钮底边 378（已经超出 3px），加完变 416。
+     所以短屏收三处：知识点列表矮一点、这一行压薄、标题与说明挤一挤。 */
+  /* ⚠️ 选择器必须带 `.pract-box` 前缀：这段写在 `.pract-groups` 定义**之前**，
+     而后面那条 `max-height: min(19rem, 40vh)` 与它同权重、后出现 —— 不带前缀就被盖掉，
+     实测症状是「媒体查询明明写了 25vh，量出来还是 150px」。 */
+  @media (max-height: 460px) {
+    .pract-box .pract-groups { max-height: min(19rem, 25vh); }
+    .pract-box .pract-knote-line { padding: 4px 8px; margin: 6px 0 0; font-size: 0.75rem; }
+    .pract-box .confirm-title { font-size: 1.05rem; }
+    .pract-box .pract-sub { margin-bottom: 6px; line-height: 1.5; font-size: 0.6875rem; }
+    .pract-box .pract-row { margin-top: 6px; }
+  }
+  .pract-knote-line:active { background: #16233d; }
+  .pract-knote-line b {
+    color: #ffd76a; font-weight: normal; margin-left: 6px;
+    padding: 0 6px; border-radius: 999px; background: #1a2742;
+  }
+  .pract-knote-line b.zero { color: #6f8bb0; }
+  /* 回看浮层：条目按年级分组，每条一行 */
+  .knote-box { max-width: 30rem; }
+  .knote-list {
+    max-height: min(19rem, 42vh); overflow-y: auto; padding-right: 4px;
+    margin-top: 10px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .knote-g {
+    font-size: 0.6875rem; color: #ffe08a; letter-spacing: 1px;
+    margin: 2px 0 -2px; text-align: left;
+  }
+  .knote-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; padding: 8px 10px; text-align: left;
+    background: #0e1830; border: 2px solid #3a4a6e; border-radius: 4px;
+    color: #cfd9ea; font-family: inherit; font-size: 0.8125rem; cursor: pointer;
+  }
+  .knote-item:hover { border-color: #5f8fc0; color: #fff; }
+  .knote-item .ki-hint { font-size: 0.6875rem; color: #7f8fa8; flex: none; }
   .pract-groups {
     max-height: min(19rem, 40vh); overflow-y: auto; padding-right: 4px;
     display: flex; flex-direction: column; gap: 8px;
@@ -3115,7 +3160,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.15.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.15.2</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4018,9 +4063,27 @@
         </div>
       </div>
       <div class="pract-hint" id="pracHint"></div>
+      <!-- 批 B52：听过的讲解 —— 放在练习阁里，是因为这里本来就是「补哪里不会」的地方 -->
+      <button class="pract-knote-line" id="pracKnoteLine" type="button">
+        听过的讲解<b id="pracKnoteN">0</b>
+      </button>
       <div class="confirm-ops">
         <button class="mcbtn gray" id="pracCancel">取消</button>
         <button class="mcbtn gold" id="pracStart" disabled>开始练习</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 听过的讲解（批 B52 · 练习阁的回看入口）=================
+       只列「已经被讲过」的知识点（G.knoteSeen）——没听过的不列，免得变成第二个课堂。
+       点一条 = 重听那段完整的四句（不做降级：主动点开跟被动播不是一回事）。 -->
+  <div class="confirm-overlay hidden" id="knoteBox">
+    <div class="confirm-box knote-box">
+      <div class="confirm-title">听 过 的 讲 解</div>
+      <div class="pract-sub" id="knoteSub">点一条重听。</div>
+      <div class="knote-list" id="knoteList"></div>
+      <div class="confirm-ops">
+        <button class="mcbtn gray" id="knoteBack">返回练习阁</button>
       </div>
     </div>
   </div>
@@ -4079,7 +4142,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.15.1
+   数境之旅 · 原型 v1.15.2
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -26361,17 +26424,27 @@ function knoteMarkSeen(key) {
 /* 把讲解拼成一段戏：**第一次讲全 4 屏，之后只讲 2 屏**（引子 + 第一句正文）。
    为什么保留第一句而不是最后一句：第一句是「这个知识点是什么」，最后一句多是「坑在哪」——
    当提醒时先说清是什么，比只喊一声「别忘进位」更有用。 */
-function knoteLines(key) {
+function knoteLines(key, full) {
   var rec = KNOTE[key];
   if (!rec) return null;
   var who = knoteSpeaker();
   var out = [{ who: who, text: rec.hook }];
-  if (knoteSeen(key)) {
+  /* full=true：主动回看（练习阁）—— 孩子专门点开来听，不该只给两句 */
+  if (!full && knoteSeen(key)) {
     out.push({ who: who, text: rec.body[0] });
     return out;
   }
   for (var i = 0; i < rec.body.length; i++) out.push({ who: who, text: rec.body[i] });
   return out;
+}
+
+/* 听过讲解的知识点，按「年级 → 知识点原始顺序」排好。
+   为什么不按时间排：存档里只记了「讲过没」没记时间戳；而年级顺序正好是孩子的心智顺序，
+   翻起来找得到。要按时间排得再存一个时间戳，为一个列表不值当。 */
+function knoteSeenList() {
+  var seen = (G && G.knoteSeen) || {};
+  var keys = Object.keys(KNOWLEDGE);
+  return keys.filter(function (k) { return !!seen[k] && !!KNOTE[k]; });
 }
 
 /* 本场错得最多的知识点（并列时取最后错的那个）—— 一场只讲一个 */
@@ -27172,6 +27245,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.15.2", d: "10-29", one: "练习阁多了「听过的讲解」，讲过的能按年级翻出来重听", notes: ["练习阁底下多了一行「听过的讲解」，后面跟着数字，那是你已经听过几条。点开按年级翻，挑一条重听。","重听给的是完整四句，不是后来那两句提醒——你专门点开来听，就不该只给半段。","只列讲过的。没听过的不会出现在这里：这里不是第二个课堂，是复习的地方。","听完直接回练习阁，不用折回地图。"] },
   { v: "v1.15.1", d: "10-29", one: "引路人换了成人相；同一知识点讲过只讲两句；讲解可跳过", notes: ["讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。","同一个知识点第一次讲四句，之后再错到它只讲两句——先用一句说清是什么，不再把同一段当噪音放第三遍。","讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。"] },
   { v: "v1.15.0", d: "10-29", one: "讲解补齐到 74 个知识点（一到六年级全都有）", notes: ["上一版只有三年级 10 个知识点有讲解，其余遇到错题只挡一下、不开口。现在 74 个全都补齐——不管你在哪个年级的域里错了题，回图前都有一段。","每一段都是四句：一句开头 + 三句正题。不讲你错的那一道，只讲那道题背后的那个知识点。","难度题（找规律、找次品、鸽巢、优化问题这类）讲的是「怎么入手」，不是「公式是什么」——这类题本来就没有一个公式能概括。","还是那句话：有没有旧影都听得到。没有的话，由书院的引路人讲同一段。"] },
   { v: "v1.14.0", d: "10-29", one: "答错时旧影替你挡一下；打完把这题背后的知识点讲一遍（三年级 10 个）", notes: ["现在你手上有旧影了。战斗中第一次答错，它会替你挡掉那一下 —— 每场只挡一次，挡完那句写得很直：「下次自己来。」","打完点「回到地图」，它会讲一段：只讲这道题背后的那个知识点，四句话，不针对你错的那一道。讲透一个，比连讲五个有用。","一场只讲一个。要是这局错了三个知识点，它挑错得最多的那个讲。","结算页会先出现一行小字告诉你：谁要讲、讲哪个 —— 不至于点了按钮突然冒出一段戏。","这一段不是奖励。「听讲解」这件事跟有没有旧影无关：没有旧影的孩子，同样的讲解由书院的引路人讲。","这一版先做三年级 10 个知识点（两位数乘一位数、两位数除以一位数、长方形周长、长方形面积、单位换算、时分秒换算、两位数乘两位数、年月日、位置与方向、复式统计表）。其余年级陆续补。"] },
@@ -27250,13 +27324,14 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.15.1',
+  ver: 'v1.15.2',
   date: '2026-10-29',
-  one: '讲解换了位更像先生的人来讲；同一个知识点讲过就不再絮叨，还能一键跳过。',
+  one: '练习阁里多了「听过的讲解」：讲过的那些，随时能再听一遍。',
   items: [
-    '讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。',
-    '同一个知识点第一次讲四句，之后再错到它只讲两句 —— 先用一句说清是什么，不再把同一段当噪音放第三遍。',
-    '讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。'
+    '练习阁底下多了一行「听过的讲解」，后面跟着数字 —— 那是你已经听过几条。点开能按年级翻，挑一条重听。',
+    '重听给的是完整四句，不是后来那两句提醒：你专门点开来听，就不该只给半段。',
+    '只列讲过的。没听过的不会出现在这里 —— 这里不是第二个课堂，是复习的地方。',
+    '听完直接回练习阁，不用折回地图。'
   ]
 };
 
@@ -30440,6 +30515,14 @@ function renderPractice() {
   Array.prototype.forEach.call(box.querySelectorAll('.pract-gall'), function (b) {
     b.onclick = function () { togglePracGroup(parseInt(b.getAttribute('data-g'), 10)); };
   });
+  /* 批 B52：刷新「听过的讲解」计数（0 条时数字变灰，但仍可点开看提示） */
+  var _kn = document.getElementById('pracKnoteN');
+  if (_kn) {
+    var _n = knoteSeenList().length;
+    _kn.textContent = _n;
+    _kn.classList.toggle('zero', _n === 0);
+  }
+
   // 题量 / 时限两组分段按钮
   Array.prototype.forEach.call(document.querySelectorAll('#pracCount button'), function (b) {
     b.classList.toggle('on', parseInt(b.getAttribute('data-n'), 10) === PRAC.count);
@@ -30480,6 +30563,67 @@ function openPractice() {
   renderPractice();
   document.getElementById('pracBox').classList.remove('hidden');
 }
+/* =====================================================================
+   批 B52 · 听过的讲解（练习阁的回看入口）
+   ---------------------------------------------------------------------
+   只列 G.knoteSeen 里的知识点（＝ 战斗里被讲过的那几条）。没听过的不列：
+   一旦把全部 74 条都摆出来，这里就成了「第二个课堂」，跟讲解「在你卡住时才出现」
+   的设计冲突。要学新东西去练题，要复习听过的东西来这里。
+   ===================================================================== */
+function openKnoteReview() {
+  Audio2.init();
+  renderKnoteList();
+  document.getElementById('knoteBox').classList.remove('hidden');
+}
+function closeKnoteReview() {
+  var el = document.getElementById('knoteBox');
+  if (el) el.classList.add('hidden');
+}
+function renderKnoteList() {
+  var box = document.getElementById('knoteList');
+  if (!box) return;
+  var list = knoteSeenList();
+  var sub = document.getElementById('knoteSub');
+  if (!list.length) {
+    box.innerHTML = '';
+    if (sub) sub.textContent = '还没听过讲解。战斗中答错一次，回图前就会讲一段，讲过的会记在这里。';
+    return;
+  }
+  if (sub) sub.textContent = '点一条重听（已听过 ' + list.length + ' 条）。';
+  var out = '', lastG = 0;
+  list.forEach(function (k) {
+    var g = KNOWLEDGE[k].grade || 0;
+    if (g !== lastG) { out += '<div class="knote-g">' + (CN_GRADE[g - 1] || '') + '年级</div>'; lastG = g; }
+    out += '<button class="knote-item" data-k="' + k + '">' +
+             '<span>' + (KNOWLEDGE[k].label || k) + '</span>' +
+             '<span class="ki-hint">再听一遍 ›</span>' +
+           '</button>';
+  });
+  box.innerHTML = out;
+  Array.prototype.forEach.call(box.querySelectorAll('.knote-item'), function (b) {
+    b.onclick = function () { playKnoteReview(b.getAttribute('data-k')); };
+  });
+}
+/* 点一条 → 播完整四句 → 回练习阁（不是回地图：孩子是从练习阁点进来的） */
+function playKnoteReview(key) {
+  var lines = knoteLines(key, true);
+  if (!lines) return;
+  closeKnoteReview();
+  var wasPracticeOpen = !document.getElementById('pracBox').classList.contains('hidden');
+  playStory(lines, function () {
+    if (wasPracticeOpen) { renderPractice(); openPractice(); } else { openKnoteReview(); }
+  }, { skip: true });
+}
+(function () {
+  var _pl = document.getElementById('pracKnoteLine');
+  if (_pl) _pl.onclick = openKnoteReview;
+})();
+document.getElementById('knoteBack').onclick = function () {
+  closeKnoteReview();
+  renderPractice();
+  openPractice();
+};
+
 function closePractice() {
   PRAC.open = false;
   var el = document.getElementById('pracBox');
