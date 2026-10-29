@@ -1683,6 +1683,15 @@
   .ac-bar { display: block; height: 4px; background: #1a2742; border-radius: 2px; overflow: hidden; margin-top: 3px; }
   .ac-bar > span { display: block; height: 100%; background: #4a7c59; }
   .achv-row.got .ac-bar > span { background: #ffd76a; }
+  /* 批 B46：顶部总进度条 —— 「已达成 3 / 13（23%）」下面那一条。
+     和单条成就的 .ac-bar 同一套配色（深槽 #1a2742 / 湿地绿 #4a7c59 / 达成转金），
+     只是粗一点（6px）好让人一眼看出是"总进度"而不是某一条。
+     flex:1 1 100% 让它独占一行：.achv-top 是 flex + wrap，不加这句会跟文字挤同一行。 */
+  .achv-total { display: block; flex: 1 1 100%; height: 8px; background: #101a2c;
+    border-radius: 4px; overflow: hidden; margin-top: 3px;
+    box-shadow: inset 0 0 0 1px #24334f; }
+  .achv-total > span { display: block; height: 100%; background: #4a7c59; transition: width .25s; }
+  .achv-total.full > span { background: #ffd76a; }
   .ac-right { flex: 0 0 auto; text-align: right; font-size: 0.6875rem; color: #7f8fa8;
     display: flex; flex-direction: column; gap: 2px; }
   .ac-right em { font-style: normal; color: #5a6a88; }
@@ -3071,7 +3080,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.11.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.11.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4033,7 +4042,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.11.0
+   数境之旅 · 原型 v1.11.1
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -23425,9 +23434,14 @@ function updateAchvTab() {
   var top = document.getElementById('achvTop');
   if (top) {
     var n = list.filter(function (x) { return x.got; }).length;
+    /* 批 B46：百分比先算出来，文字与进度条共用同一个数 —— 两处各算一次必然漂 */
+    var pctAll = list.length ? Math.round(n / list.length * 100) : 0;
+    var allDone = list.length > 0 && n === list.length;
     top.innerHTML = '<span class="achv-count">已达成 <b>' + n + '</b> / ' + list.length +
-      '（' + Math.round(n / list.length * 100) + '%）</span>' +
-      '<span class="achv-hint">达成即得奖励，自动发放 · 点条目看达成时间</span>';
+      '（' + pctAll + '%）</span>' +
+      '<span class="achv-hint">达成即得奖励，自动发放 · 点条目看达成时间</span>' +
+      '<span class="achv-total' + (allDone ? ' full' : '') + '" data-pct="' + pctAll + '"' +
+        ' title="总计 ' + n + ' / ' + list.length + '"><span style="width:' + pctAll + '%"></span></span>';
   }
   var box = document.getElementById('achvList');
   if (!box) return;
@@ -26070,6 +26084,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.11.1", d: "10-29", one: "成就页顶上多了一条总进度条，收齐几枚一眼看得见", notes: ["人物 → 成就，原来顶上只有一行「已达成 3 / 13（23%）」，得读数字才知道进度。现在这行下面多了一条横贯面板的细条，攒几枚就亮几成。","这条比下面每一枚自己的小条要粗一点（8px），并且外面有一圈暗描边，所以不会和「这一枚还差多少」混在一起。","13 枚全收齐时，整条会转成金色 —— 和单条成就达成时的颜色一样，不用再数还剩几个。"] },
   { v: "v1.11.0", d: "10-28", one: "首页右下角的版本号能点开看最近三版；设置里能看完整公告", notes: ["标题屏右下角的版本号点一下，会弹出一张小卡：最近三个版本、各自改了什么，再点一下就收起来。以前点它是弹一个小提示框，只有当前这一版，看着挤。","设置里多了一行「版本更新」，点开是完整公告 —— 从 10-09 动工那天到今天，六十多个版本全在里面，点任一版能看到那一版具体改了哪几条。","公告内容不是手抄的，是从每版都在写的更新公告文档里自动生成的，所以以后发版不会漏、也不会写得跟文档对不上。"] },
   { v: "v1.10.1", d: "10-28", one: "教材最后两条「待核」核完（苏教找规律改到二年级）；存档说明补齐导出 / 导入", notes: ["如果你选的是苏教版：一年级不会再出现「找规律」的题了。查下来苏教一年级两册都没有这一课，最早在二年级上册的「数学好玩·图形中的规律」。以前按一年级给，一年级孩子可能抽到还没学的题。","如果你选的是冀教版：位置说明补准了 ——「探索乐园」是一年级上册第五单元，讲的正是简单事物中的规律。","存档页和「规则」里的说明补齐了导出 / 导入。以前那里只写「换设备会丢失」，看着像没有办法，其实上一版已经能给存档搬家了。"] },
   { v: "v1.10.0", d: "10-28", one: "存档能导出带走了：换设备、换浏览器都不怕丢", notes: ["存档页多了两个按钮：「导出存档」（存成一个文件）和 「导入存档」（在新设备上读回来）。","导入的存档不会覆盖你本机的档位。它会先放在存档列表最下面的「导入档」里，标着「外来」；你点「转存」，挑一个存档位放进去，才算真正落位。","所以换设备时：旧设备点导出 → 把文件发给自己 → 新设备点导入 → 转存。原来的进度一点没少。"] },
@@ -26141,13 +26156,13 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.11.0',
-  date: '2026-10-28',
-  one: '首页右下角那个版本号，现在点开能看到最近三版改了什么。',
+  ver: 'v1.11.1',
+  date: '2026-10-29',
+  one: '成就页顶上多了一条总进度条，13 枚收齐了几枚一眼看得见。',
   items: [
-    '标题屏右下角的版本号点一下，会弹出一张小卡：最近三个版本、各自改了什么，再点一下就收起来。以前点它是弹一个小提示框，只有当前这一版，看着挤。',
-    '设置里多了一行「版本更新」，点开是完整公告 —— 从 10-09 动工那天到今天，六十多个版本全在里面，点任一版能看到那一版具体改了哪几条。',
-    '公告内容不是手抄的，是从每版都在写的更新公告文档里自动生成的，所以以后发版不会漏、也不会写得跟文档对不上。'
+    '人物 → 成就，原来顶上只有一行「已达成 3 / 13（23%）」，数字得读才知道进度。现在这行下面多了一条细长的进度条，攒多少亮多少，填满就变金色。',
+    '它和下面每条成就自己的小条是一套配色，只是粗一点（6px），所以一眼能分清哪条是「总进度」、哪条是「这一枚还差多少」。',
+    '填满（13 枚全收齐）时整条会转成金色，和单条成就达成时的颜色一致，不用再数还剩几个。'
   ]
 };
 
