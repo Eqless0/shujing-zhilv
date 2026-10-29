@@ -862,6 +862,9 @@
   /* ---- 我方血条块（在左栏顶部）---- */
   .hp-hero-block { flex: 0 0 auto; width: 236px; }
   .hp-hero-block .who { font-size: 0.8125rem; font-weight: bold; color: #f0e6d0; margin-bottom: 6px; }
+  /* 批 B58：名字 + 旧影开关 横排（⛔ 别把按钮塞进 #heroName —— 20430 行那句 innerHTML 每次进战斗都会把它抹掉） */
+  .who-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .who-row .who { margin-bottom: 0; }
   .hp-hero-block .who .lv { color: #ffe08a; font-size: 0.6875rem; }
   .hp-hero-block .hp-track { width: 100%; }
   .hp-hero-block .num {
@@ -870,7 +873,16 @@
 
   /* ---- 技能栏（批 E4：在左栏血条下方，「4 格 + 行囊」一行）---- */
   .skill-bar { display: flex; flex-direction: column; gap: 5px; }
+  /* 批 B58：说明行右端放「旧影」开关（布局 B —— 用掉本来就空着的右半边，零位移）
+     ⛔ 别改成「行囊右边并排」：那样整排会变宽，把小竹往右推（桌面 116px / 手机 38px），
+        667 宽的横屏上小竹和草精会挤在一起。实测对照见 docs/07-素材/预览页/英灵开关-位置三选.png */
   .skill-bar .skill-label { font-size: 0.6875rem; color: #7f9ec9; text-align: left; }
+  .spirit-sw { font-family: inherit; font-size: 0.6875rem; letter-spacing: 0; line-height: 1.5;
+    color: #9ad0ff; background: #101c30; border: 1px solid #2b4a72; padding: 1px 6px;
+    white-space: nowrap; cursor: pointer; }
+  .spirit-sw { margin-left: auto; }   /* 批 B58：贴到血条右缘（那一列 236 / 矮屏 190 宽） */
+  .spirit-sw:hover { border-color: #5f8fc0; }
+  .spirit-sw.off { color: #6f7d92; border-color: #2a3446; background: #0c1524; }
   .skill-row { display: flex; align-items: center; gap: 10px; }
   .skill-slots { display: flex; gap: 8px; }
   .sk-slot {
@@ -3188,7 +3200,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.17.1</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.18.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -3419,7 +3431,13 @@
         <!-- 批 E4（方案 A）：血条 + 技能栏 + 行囊 归到左下角一竖列，右侧战场空出来 -->
         <div class="hero-left" id="heroLeft">
           <div class="hp-hero-block">
-            <div class="who" id="heroName">小竹 <span class="lv" id="heroLv"></span></div>
+            <!-- 批 B58：旧影总开关。放名字行右端（与血条同右缘）—— 零位移，矮屏也看得见。
+                 ⛔ 别放到「主动技 · 出题时自动触发」那行：矮屏媒体查询把整行 display:none 了（约第 1349 行），
+                    手机上会直接消失；也别放到行囊右边并排：整排变宽，小竹被推右 116px / 38px。 -->
+            <div class="who-row">
+              <div class="who" id="heroName">小竹 <span class="lv" id="heroLv"></span></div>
+              <button type="button" class="spirit-sw" id="btnSpirit" title="旧影要不要替你出手 / 挡刀">旧影 开</button>
+            </div>
             <div class="hp-track"><div class="hp-lag" id="heroHpLag"></div><div class="hp-fill hero" id="heroHp" style="width:100%"></div></div>
             <div class="num" id="heroHpNum">100 / 100</div>
           </div>
@@ -4170,7 +4188,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.17.1
+   数境之旅 · 原型 v1.18.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -5993,7 +6011,8 @@ function drawMonster(ctx, W, H, art, s0) {
    音量存 0~1，缺字段一律回落默认值（老存档只有 sfx/vib，读进来照样能用）。 */
 var OPT_KEY = 'shujing_opt_v1';
 var OPT = { sfx: 1, vib: 1, music: 1, volMusic: 0.35, volSfx: 0.8,
-            type: 1, voice: 1, tts: 0 };
+            type: 1, voice: 1, tts: 0,
+            spirit: 1 };   /* 批 B58：旧影开关（1 帮 / 0 不帮），默认帮 */
 function clamp01(v, dflt) {
   v = parseFloat(v);
   if (isNaN(v)) return dflt;
@@ -6014,6 +6033,8 @@ function loadOpt() {
       OPT.type = d.type === 0 ? 0 : 1;
       OPT.voice = d.voice === 0 ? 0 : 1;
       OPT.tts = d.tts === 1 ? 1 : 0;
+      /* 批 B58：旧影开关（缺字段 → 开，老存档不被静默关掉） */
+      OPT.spirit = d.spirit === 0 ? 0 : 1;
     }
   } catch (e) {}
 }
@@ -6022,7 +6043,8 @@ function saveOpt() {
     localStorage.setItem(OPT_KEY, JSON.stringify({
       sfx: OPT.sfx, vib: OPT.vib, music: OPT.music,
       volMusic: OPT.volMusic, volSfx: OPT.volSfx,
-      type: OPT.type, voice: OPT.voice, tts: OPT.tts
+      type: OPT.type, voice: OPT.voice, tts: OPT.tts,
+      spirit: OPT.spirit
     }));
   } catch (e) {}
   if (typeof syncOptUI === 'function') syncOptUI();
@@ -20222,6 +20244,7 @@ function startBattle(zone, kind, monIdx) {
                         // 否则它会继续扣新战斗的时间，并在 B.q 为空时引爆 answerChoice
   hideVerdict();
   closeItemPop();
+  syncSpiritBtn();      /* 批 B58：进战斗时按偏好刷新字样（防上次关着、这局显示开） */
   var isBoss = kind === 'boss';
   // Boss 战前先播守律者剧情（每区域一次）
   if (isBoss && zone.bossStory && !zone._bossStoryPlayed) {
@@ -26904,8 +26927,32 @@ function spiritPick(grade) {
   return near[0];
 }
 
+/* 批 B58：旧影总开关（战斗界面「主动技」那行右端那颗）
+   1 = 让旧影替你出手 / 挡刀（默认），0 = 这一场自己来。
+   ⛔ 只拦「替你打」这两件事。旧影台的收人演出、错题后的知识点讲解都不受它管 ——
+      那是故事和教学，不是代打；关掉开关不该让孩子也听不到讲解。 */
+function spiritOff() { return OPT.spirit === 0; }
+function syncSpiritBtn() {
+  var el = document.getElementById('btnSpirit');
+  if (!el) return;
+  var off = spiritOff();
+  el.textContent = off ? '旧影 关' : '旧影 开';
+  el.classList.toggle('off', off);
+  el.setAttribute('aria-pressed', off ? 'false' : 'true');
+}
+function toggleSpirit() {
+  OPT.spirit = spiritOff() ? 1 : 0;
+  saveOpt();            /* 记住选择：换一场、关掉浏览器都还算数 */
+  syncSpiritBtn();
+  try { Audio2.tone(OPT.spirit ? 720 : 420, .06, 'square', .04); } catch (e) {}
+  if (typeof B !== 'undefined' && B && B.active) {
+    flashBattleNote(OPT.spirit ? '旧影会再来 —— 撑不住时它出手' : '旧影退到一边 —— 这一场自己来');
+  }
+}
+
 /* 该不该有前辈出手？四道门都必须过 */
 function spiritShouldHelp() {
+  if (spiritOff()) return false;                     /* 批 B58：开关关掉 → 不出手 */
   if (!B || !B.active || !B.zone) return false;
   if (!B.zone.rift) return false;                    /* 只在裂隙 */
   if (B.kind === 'practice') return false;
@@ -27770,6 +27817,7 @@ function knotePickKey() {
 /* 旧影能不能替你挡这一下：要有旧影、每场一次、不是练习阁 */
 function spiritCanBlock() {
   try {
+    if (spiritOff()) return false;                   /* 批 B58：开关关掉 → 不挡刀 */
     if (B.kind === 'practice') return false;
     if (B.spiritBlockUsed) return false;
     var owned = (G.spirit && G.spirit.owned) || [];
@@ -28491,6 +28539,8 @@ document.addEventListener('click', function (e) {
   if (e.target && e.target.id === 'btnItems') return;
   closeItemPop();
 });
+document.getElementById('btnSpirit').onclick = function () { toggleSpirit(); };
+syncSpiritBtn();      /* 批 B58：开机就先对上偏好 —— 别等进战斗才刷新（B12 抓到的：重载后字样仍是旧的） */
 document.getElementById('btnItems').onclick = function () {
   Audio2.tone(660, .06, 'square', .04);
   var pop = document.getElementById('itemPop');
@@ -28553,6 +28603,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.18.0", d: "10-29", one: "战斗里多了「旧影 开 / 关」，不想被代打可以自己来", notes: ["战斗界面左下，「主动技 · 出题时自动触发」这一行的右端，多了一颗小小的「旧影 开」。","点一下变「旧影 关」、字色发灰：这一场旧的影子不会再替你出手，也不会替你挡那一下。再点一下就能请回来。","默认是开。第一次遇到它出手是惊喜——关着就永远发现不了，所以不默认关。","关掉的只是「替你打」：旧影台的收人、答错之后那段知识点讲解，都照旧 —— 那是故事和课，不是代打。","选择会记住：换一场、关掉浏览器再打开，还是你上次点的那个。"] },
   { v: "v1.17.1", d: "10-29", one: "家长面板里六个年级的说法题都标了课本位置", notes: ["人物 → 家长 → 知识点掌握，每个知识点下面那行小字写着「在课本哪一册哪一单元」。说法题那六条以前是空的，现在补上了。","说法题本来就不是某一单元的题——它把整册的定义、公式、换算拿出来问，所以位置写成「每册主要几单元 等」，不是精确到某一页。","这一版补的是人教课本的位置。用北师、苏教、冀教的话，这一栏仍会显示人教的说法；但「几年级出这道题」是按你那版单独核过的，不影响会不会抽到没学过的东西。"] },
   { v: "v1.17.0", d: "10-29", one: "说法题六个年级全满：每级 12 道，共 72 道", notes: ["二到六年级也补满了。一年级那批是试点，现在六个年级一共 72 道——不管你在哪个年级的数域里，都会遇到。","每级都是 8 道挑符号、4 道从四句里挑对的那句。挑符号的一眼能答，用来稳概念；四句的那类才考真本事。","错的那三句不是随便编的：一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","每道题都只考该年级课本上写过的东西。教材位置还没核完，等核完再补一句「在哪一册」。"] },
   { v: "v1.16.1", d: "10-29", one: "说法题一年级补满 12 道；长句改上下排；基础档先不出长题", notes: ["一年级的说法题补满了：六道让你挑符号（长方形的面积 = 长 □ 宽 那种），六道让你从四句说法里挑出对的那一句。","那三句错话不是随便编的——一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","长句题换了排法：题干在上、四个选项在下，一句一行。以前挤在右边那一条窄栏里，一句话被切成两截，像断句。","还有一处看不见的：刚进一个图、手感还没上来时（基础档）先不给你出要读四句的长题；连对几道升上来，它才出现。"] },
@@ -28636,13 +28687,13 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.17.1',
+  ver: 'v1.18.0',
   date: '2026-10-29',
-  one: '家长面板里，六个年级的「定理与定律」现在都标了课本位置。',
+  one: '战斗里多了「旧影 开 / 关」：不想被代打，可以自己来。',
   items: [
-    '人物 → 家长 → 知识点掌握，每个知识点下面那行小字写着「在课本哪一册哪一单元」。说法题那六条以前是空的，现在补上了。',
-    '说法题本来就不是某一单元的题 —— 它把整册的定义、公式、换算拿出来问，所以位置写成「每册主要几单元 等」，不是精确到某一页。',
-    '这一版补的是人教课本的位置。用北师、苏教、冀教的话，这一栏仍会显示人教的说法；但「几年级出这道题」是按你那版单独核过的，不影响会不会抽到没学过的东西。'
+    '战斗界面左下，「主动技 · 出题时自动触发」这一行的右端，多了一颗小小的「旧影 开」。',
+    '点一下变「旧影 关」、字色发灰：这一场它不会再替你出手，也不会替你挡那一下。再点一下请回来。默认是开 —— 第一次遇见它出手是惊喜，关着就永远发现不了。',
+    '关掉的只是「替你打」。旧影台的收人、答错之后那段讲解都还在 —— 那是故事和课，不是代打。选择会记住，换一场、重开浏览器都算数。'
   ]
 };
 
