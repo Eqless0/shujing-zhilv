@@ -2228,6 +2228,44 @@
     .result-knote { margin: 4px auto 0; padding: 2px 8px; font-size: 0.75rem; line-height: 1.3; }
     .result-knote .rk-tip { display: none; }
   }
+  /* ---- 批 B60：旧影台「点灯请人」—— 一屏三盏灯，亮着的那盏是跟着你的那位 ---- */
+  .spirit-box { max-width: 34rem; }
+  .lamp-wrap { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 2px; }
+  .lamp-row { display: flex; gap: 12px; justify-content: center; min-height: 128px; }
+  .lamp { width: 6.2rem; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: none; border: 1px solid transparent; border-radius: 6px; padding: 6px 2px 8px; cursor: pointer; }
+  .lamp:hover { border-color: #2b4a72; background: #0f1b2e; }
+  .lamp-ico { position: relative; width: 34px; height: 60px; }
+  .lamp-ico i { position: absolute; display: block; }
+  /* 灭灯：蜡烛压暗、只留一截暗灯芯；点着：烛身变亮、火苗撑开发光（两种状态靠形+色区分，不只靠颜色） */
+  .lamp-ico .wax { left: 9px; bottom: 7px; width: 16px; height: 34px; background: #b7ae99; box-shadow: inset -4px 0 0 #948b78; }
+  .lamp-ico .base { left: 2px; bottom: 0; width: 30px; height: 7px; background: #5c6980; }
+  .lamp-ico .flame { left: 15px; top: 9px; width: 4px; height: 7px; background: #3b4155; border-radius: 40% 40% 30% 30%; }
+  .lamp.on .flame { left: 12px; top: 3px; width: 10px; height: 14px; background: #ffd76a;
+    border-radius: 50% 50% 45% 45%; box-shadow: 0 0 10px 4px rgba(255,215,106,.45); }
+  .lamp.on .wax { background: #f0e6cc; box-shadow: inset -4px 0 0 #cfc2a2, 0 0 14px rgba(255,215,106,.22); }
+  .lamp.on .base { background: #7f8ea6; }
+  .lamp-nm { font-size: 0.8125rem; color: #cfe0f5; }
+  .lamp.on .lamp-nm { color: #ffe08a; font-weight: bold; }
+  .lamp-sub { font-size: 0.625rem; color: #6f8bb0; }
+  .lamp-tag { font-size: 0.625rem; color: #9ad0ff; letter-spacing: 1px; min-height: 14px; }
+  .lamp-nav { width: 26px; height: 40px; background: none; border: 1px solid #2b4a72; color: #9ad0ff;
+    font-size: 1rem; cursor: pointer; border-radius: 4px; }
+  .lamp-nav:hover { border-color: #5f8fc0; }
+  /* 翻页到尽头时只藏不撤：留出宽度，免得三盏灯左右跳一下（.hidden 是全局 display:none） */
+  .lamp-nav.hidden { display: block; visibility: hidden; }
+  /* 矮屏（667×375 这类）：灯缩小一档，别把确认框顶出屏幕 */
+  @media (max-height: 460px) {
+    .lamp-wrap { margin: 6px 0 0; }
+    .lamp-row { min-height: 92px; gap: 8px; }
+    .lamp { width: 5.2rem; padding: 2px 2px 4px; gap: 2px; }
+    .lamp-ico { width: 26px; height: 44px; }
+    .lamp-ico .wax { left: 7px; bottom: 5px; width: 12px; height: 25px; }
+    .lamp-ico .base { left: 1px; width: 24px; height: 6px; }
+    .lamp-ico .flame { left: 9px; width: 7px; height: 9px; }
+    .lamp-tag { min-height: 12px; }
+  }
+
   .map-card.spirit-card { border-color: #2b4a72; background: #101c30; }
   .map-card.spirit-card:hover { border-color: #5f8fc0; }
   .map-card.spirit-card .mc-name { color: #9ad0ff; }
@@ -4119,6 +4157,27 @@
     </div>
   </div>
 
+  <!-- ================= 旧影台 · 点灯请人（批 B60）=================
+       只列已经遇见的旧影（G.spirit.owned）—— 亮着的那盏就是跟着你的那位。
+       点另一盏 = 先问一句、再走「交接」两屏。⛔ 由确认框来问，不让要走的那位开口问 ——
+       那会把换人变成背叛，孩子不敢换。
+       还没有旧影时不弹这个面板，直接进那一场（首次靠打，不靠选）。 -->
+  <div class="confirm-overlay hidden" id="spiritBox">
+    <div class="confirm-box spirit-box">
+      <div class="confirm-title">旧 影 台</div>
+      <div class="pract-sub" id="spiritSub">点一盏灯，请他跟着你。</div>
+      <div class="lamp-wrap">
+        <button class="lamp-nav hidden" id="spiritPrev" title="往前一盏">‹</button>
+        <div class="lamp-row" id="spiritLamps"></div>
+        <button class="lamp-nav hidden" id="spiritNext" title="往后一盏">›</button>
+      </div>
+      <div class="confirm-ops">
+        <button class="mcbtn gray" id="spiritFight">再进一次</button>
+        <button class="mcbtn gray" id="spiritClose">回地图</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= 心法考验（升级快题）================= -->
   <div class="trial-overlay hidden" id="trialBox">
     <div class="trial-panel">
@@ -4369,7 +4428,7 @@ var SLOT_COUNT = 5;                   // 存档位数量
    本机档与外来档并存，能对比、能随时删，比「先覆盖再备份」可靠得多。 */
 var IMPORT_SLOT = 0;
 var SLOT_PREF = 'shujing_slot';       // 当前「使用中」的存档位（自动存档写入此处）
-var SAVE_VER = 25;   /* 批 B51 讲解去过重：+knoteSeen（v24 及更早老档补默认，不作废） */   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
+var SAVE_VER = 26;   /* 批 B60 旧影随身：+spirit.pin（v25 及更早老档补空串=取最近一位，不作废） */   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
 
 function slotStorageKey(n) { return 'shujing_save_' + n; }
 function clampSlot(n) {
@@ -4597,6 +4656,8 @@ function loadGame(slot) {
       /* 批 B48：旧影台（v23 及更早的老档没有这个字段 → 补默认，不作废） */
       G.spirit = (d.spirit && typeof d.spirit === 'object') ? d.spirit : spiritDefault();
       if (!Array.isArray(G.spirit.owned)) G.spirit.owned = [];
+      /* 批 B60：v25 及更早没有 pin → 空串，读数时回退到 owned 末位（老档不作废） */
+      if (typeof G.spirit.pin !== 'string') G.spirit.pin = '';
       /* 批 B51：讲过的知识点（v24 及更早老档没有 → 空表，等于「都没讲过」） */
       G.knoteSeen = (d.knoteSeen && typeof d.knoteSeen === 'object') ? d.knoteSeen : {};
       /* 批 END：谢幕卷「已看过」的时间戳（只决定首次是否自动播三句，不影响能否重看） */
@@ -19131,7 +19192,9 @@ function renderSpiritCard(grid) {
   var ds = document.createElement('div');
   ds.className = 'mc-desc';
   var n = (G.spirit && G.spirit.owned) ? G.spirit.owned.length : 0;
-  ds.textContent = n ? ('已遇见 ' + n + ' 位 · 可再去') : '彩蛋 · 这里留过很多人的影子';
+  var who = spiritPinned();
+  /* 批 B60：先把「跟着你的是谁」说出来 —— 否则收集了也看不出差别 */
+  ds.textContent = n ? ('跟着你的是 ' + (who ? who.name : '—') + ' · 点灯换人') : '彩蛋 · 这里留过很多人的影子';
   card.appendChild(ds);
   /* 图标：一盏灯（简洁，不依赖图片资源） */
   var ctx = cv.getContext('2d');
@@ -19141,7 +19204,7 @@ function renderSpiritCard(grid) {
   ctx.beginPath(); ctx.arc(20, 17, 6, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#5f8fc0'; ctx.fillRect(17, 23, 6, 9);
   ctx.fillStyle = '#ffd76a'; ctx.fillRect(19, 12, 2, 4);
-  card.onclick = function () { enterSpiritMap(); };
+  card.onclick = function () { openSpiritDesk(); };   /* 批 B60：收过就点灯换人，没收过仍直接进 */
   grid.appendChild(card);
 }
 
@@ -24508,7 +24571,8 @@ var WISH_WIN_STEP = 100;    // 每累计 100 场胜利 1 张
 var WISH_MONTHLY_CAP = 2;   // 可重复来源每月最多 2 张
 
 /* 批 B48：旧影台存档结构 —— owned 存「遇见过的旧影」，from 区分来源（preset / alt 存档） */
-function spiritDefault() { return { owned: [], seen: 0, mapDone: 0 }; }
+function spiritDefault() { return { owned: [], seen: 0, mapDone: 0, pin: '' }; }
+/* 批 B60：pin = 当前跟着你的那位的 id；空串 = 取 owned 末位（等于老档行为） */
 
 function wishDefault() {
   return {
@@ -26908,8 +26972,7 @@ function spiritPick(grade) {
      改之前是从预置池按年级随机抽，收谁都不影响，等于收集零回报（也是「阿禾讲、小满挡」那个分裂的根源）。
      同级 → 用他自己的台词；跨级 → 一句通用问候（避免降智）；没收藏 → 回退下面的预置池，
      新玩家第一次被扶一把的体验不废。 */
-  var _own = (G.spirit && G.spirit.owned) || [];
-  var _mine = _own.length ? _own[_own.length - 1] : null;
+  var _mine = spiritPinned();
   if (_mine && _mine.name) {
     return {
       alias: _mine.name,
@@ -26933,6 +26996,102 @@ function spiritPick(grade) {
 /* 批 B59：这里的「旧影 开 / 关」开关已撤回（2026-10-29 下午）。
    作者重新定位：只跟一位、是彩蛋，没有「帮不帮」的选择余地；
    要不要换人留给第二批（旧影台挑人），战斗界面不再放任何英灵 UI。 */
+
+/* =======================================================================
+   批 B60：旧影台「点灯请人」—— 2026-10-29
+   -----------------------------------------------------------------------
+   一句话：收了不止一位之后，得能挑。挑不是一个开关，是「请谁跟着你」。
+   四条约束（改之前先读）：
+   ① **pin 优先，空串回退 owned 末位** —— 老档没这个字段，读数回退就等于「最近一位」，不作废。
+   ② **首次不弹面板**（owned 为空时直接进那一场）：第一次靠打，不靠选。
+   ③ **由确认框来问，不让要走的那位开口问** —— 那会把换人变成背叛，孩子就不敢换了。
+   ④ **交接台词不按人写**：走的永远是「我在这儿等过你。」，来的是他自己那句（owned[].line）。
+      不做 A 对 B 的逐对台词（18×18 会爆炸）。
+   ======================================================================= */
+var SPIRIT_LAMP_PER = 3;      /* 一屏三盏，多了翻页 */
+var spiritLampPage = 0;
+function spiritOwnedById(id) {
+  var owned = (G.spirit && G.spirit.owned) || [];
+  for (var i = 0; i < owned.length; i++) if (owned[i] && owned[i].id === id) return owned[i];
+  return null;
+}
+/* 跟着你的那位：pin 指向在册的就用他；pin 空 / 指向已不在册 → owned 末位（= 老档行为） */
+function spiritPinned() {
+  var owned = (G.spirit && G.spirit.owned) || [];
+  if (!owned.length) return null;
+  var hit = (G.spirit.pin) ? spiritOwnedById(G.spirit.pin) : null;
+  return hit || owned[owned.length - 1];
+}
+function spiritFromLabel(rec) { return rec && rec.from === "alt" ? "另一个你" : "旧影"; }
+/* 点大地图那一格：收过 → 点灯面板；没收过 → 直接进那一场 */
+function openSpiritDesk() {
+  var n = (G.spirit && G.spirit.owned) ? G.spirit.owned.length : 0;
+  if (!n) { enterSpiritMap(); return; }
+  /* 打开就翻到「跟着你的那位」所在的那一页 —— 否则第一页可能一盏都不亮，看着像没带上人 */
+  var pin = spiritPinned();
+  var idx = pin ? (G.spirit.owned || []).indexOf(pin) : -1;
+  spiritLampPage = idx >= 0 ? Math.floor(idx / SPIRIT_LAMP_PER) : 0;
+  renderSpiritLamps();
+  document.getElementById("spiritBox").classList.remove("hidden");
+}
+function closeSpiritBox() { document.getElementById("spiritBox").classList.add("hidden"); }
+function renderSpiritLamps() {
+  var owned = (G.spirit && G.spirit.owned) || [];
+  var pinned = spiritPinned();
+  var pages = Math.max(1, Math.ceil(owned.length / SPIRIT_LAMP_PER));
+  if (spiritLampPage >= pages) spiritLampPage = pages - 1;
+  if (spiritLampPage < 0) spiritLampPage = 0;
+  var from = spiritLampPage * SPIRIT_LAMP_PER;
+  var box = document.getElementById("spiritLamps");
+  box.innerHTML = "";
+  for (var i = from; i < Math.min(owned.length, from + SPIRIT_LAMP_PER); i++) {
+    var rec = owned[i];
+    var on = !!(pinned && rec && rec.id === pinned.id);
+    var el = document.createElement("button");
+    el.type = "button";
+    el.className = "lamp" + (on ? " on" : "");
+    el.setAttribute("data-id", rec.id);
+    el.innerHTML = '<span class="lamp-ico"><i class="flame"></i><i class="wax"></i><i class="base"></i></span>' +
+      '<span class="lamp-nm">' + escHtml(rec.name) + '</span>' +
+      '<span class="lamp-sub">' + (rec.grade || "?") + ' 年级 · ' + spiritFromLabel(rec) + '</span>' +
+      '<span class="lamp-tag">' + (on ? "跟 着 你" : "") + '</span>';
+    el.onclick = function () { pickSpirit(this.getAttribute("data-id")); };
+    box.appendChild(el);
+  }
+  document.getElementById("spiritPrev").classList.toggle("hidden", spiritLampPage <= 0);
+  document.getElementById("spiritNext").classList.toggle("hidden", spiritLampPage >= pages - 1);
+  var sub = document.getElementById("spiritSub");
+  if (sub) {
+    sub.textContent = "这里留着的都是先来过的人。点一盏灯，请他跟着你。" +
+      (owned.length > SPIRIT_LAMP_PER ? "（" + (spiritLampPage + 1) + " / " + pages + "）" : "");
+  }
+}
+function pickSpirit(id) {
+  var target = spiritOwnedById(id);
+  if (!target) return;
+  var cur = spiritPinned();
+  if (cur && cur.id === target.id) { appToast("已经是 " + target.name + " 跟着你了", "#9ad0ff"); return; }
+  confirmAsk("请 " + target.name + " 跟着你？",
+    cur ? ("现在跟着你的是 " + cur.name + "。") : "",
+    function () { handoverStory(cur, target); }, "请他来", null);
+}
+function handoverStory(from, to) {
+  var lines = [];
+  if (from) lines.push({ who: from.name, text: "我在这儿等过你。" });
+  lines.push({ who: to.name, text: to.line || "换我了。走吧。" });
+  /* ⛔ 先收面板再播：.confirm-overlay 的 z-index(70) 在剧情屏之上，不收就只看得见面板、看不见交接 */
+  closeSpiritBox();
+  playStory(lines, function () {
+    G.spirit.pin = to.id;
+    try { saveGame(); } catch (e) {}
+    var owned = (G.spirit && G.spirit.owned) || [];
+    var idx = owned.indexOf(to);
+    if (idx >= 0) spiritLampPage = Math.floor(idx / SPIRIT_LAMP_PER);
+    renderSpiritLamps();
+    document.getElementById("spiritBox").classList.remove("hidden");   /* 交接完回到面板，能看见灯换了 */
+    appToast("现在跟着你的是 " + to.name, "#ffd76a");
+  }, { skip: true });
+}
 
 /* 该不该有前辈出手？四道门都必须过 */
 function spiritShouldHelp() {
@@ -27092,6 +27251,7 @@ function spiritFinish() {
   var rec = spiritPickRecord();
   var dup = (G.spirit.owned || []).some(function (x) { return x.id === rec.id; });
   if (!dup) G.spirit.owned.push(rec);
+  G.spirit.pin = rec.id;          /* 批 B60：刚收下的这位自然接班（不必再手动请） */
   G.spirit.seen = Date.now();
   if (!G.spirit.mapDone) G.spirit.mapDone = Date.now();
   B.active = false;
@@ -27742,11 +27902,8 @@ var KNOTE = {
    注意：这里只用「名字」，不判断它在不在台上 —— 台上不站人（见 stageAppearance）。 */
 function knoteSpeaker() {
   try {
-    var owned = (G.spirit && G.spirit.owned) || [];
-    if (owned.length) {
-      var last = owned[owned.length - 1];
-      if (last && last.name) return last.name;
-    }
+    var mine = spiritPinned();            /* 批 B60：跟着你的那位（pin 优先，没 pin 取最近一位） */
+    if (mine && mine.name) return mine.name;
   } catch (e) {}
   return '引路人';
 }
@@ -28565,6 +28722,13 @@ document.getElementById('btnItems').onclick = function () {
   if (pop.classList.contains('hidden')) openItemPop(); else closeItemPop();
 };
 
+/* 批 B60：旧影台面板的三个按钮 + 点外部关闭 */
+document.getElementById("spiritClose").onclick = function () { closeSpiritBox(); };
+document.getElementById("spiritFight").onclick = function () { closeSpiritBox(); enterSpiritMap(); };
+document.getElementById("spiritPrev").onclick = function () { spiritLampPage--; renderSpiritLamps(); };
+document.getElementById("spiritNext").onclick = function () { spiritLampPage++; renderSpiritLamps(); };
+document.getElementById("spiritBox").onclick = function (e) { if (e.target === this) closeSpiritBox(); };
+
 /* 人物面板快捷键：C 开关 · Esc 关闭（任意界面均可用） */
 document.addEventListener('keydown', function (e) {
   var cp = document.getElementById('charPanel');
@@ -28621,7 +28785,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
-  { v: "v1.18.0", d: "10-29", one: "旧影真的会跟着你了；讲解改成「这个点没学会」才讲", notes: ["你在旧影台收下的那一位，从今往后替你出手、替你挡那一下的就是他。以前来帮忙的是路过的影子，抽到谁是谁；现在出场的就是你认识的那个人，回来的第一句话是他的口气。","你换到别的年级去，他还是会来 —— 但那时候他说的是「又见面了，我还认得你」。他不会再拿自己那年级的话糊弄你。","还没收过旧影的，裂隙残血时照样会有路过的影子扶一把 —— 那份惊喜留着。","讲解变得少而准：以前一场里错一次就讲，现在只有「这个知识点你累计错了三次以上、错比对多」，或者「这一场同一个点错了两次」，他才会开口。讲过的点不再自动重播，结算页会留一行小字告诉你去哪儿重听。","重听一律给完整四句 —— 以前「听过就只讲两句」，现在不必了，因为他不会自己再讲第二遍。"] },
+  { v: "v1.18.0", d: "10-29", one: "旧影真的会跟着你了；讲解改成「这个点没学会」才讲", notes: ["你在旧影台收下的那一位，从今往后替你出手、替你挡那一下的就是他。以前来帮忙的是路过的影子，抽到谁是谁；现在出场的就是你认识的那个人，回来的第一句话是他的口气。","你换到别的年级去，他还是会来 —— 但那时候他说的是「又见面了，我还认得你」。他不会再拿自己那年级的话糊弄你。","还没收过旧影的，裂隙残血时照样会有路过的影子扶一把 —— 那份惊喜留着。","讲解变得少而准：以前一场里错一次就讲，现在只有「这个知识点你累计错了三次以上、错比对多」，或者「这一场同一个点错了两次」，他才会开口。讲过的点不再自动重播，结算页会留一行小字告诉你去哪儿重听。","重听一律给完整四句 —— 以前「听过就只讲两句」，现在不必了，因为他不会自己再讲第二遍。","旧影台可以换人了：收过旧影之后再点那一格，进去是一排烛台——亮着的那盏是跟着你的这位，点另一盏就能请他。换之前会先问你一句，换了有个两屏的交接：走的那位说「我在这儿等过你」，来的那位说自己那句。"] },
   { v: "v1.17.1", d: "10-29", one: "家长面板里六个年级的说法题都标了课本位置", notes: ["人物 → 家长 → 知识点掌握，每个知识点下面那行小字写着「在课本哪一册哪一单元」。说法题那六条以前是空的，现在补上了。","说法题本来就不是某一单元的题——它把整册的定义、公式、换算拿出来问，所以位置写成「每册主要几单元 等」，不是精确到某一页。","这一版补的是人教课本的位置。用北师、苏教、冀教的话，这一栏仍会显示人教的说法；但「几年级出这道题」是按你那版单独核过的，不影响会不会抽到没学过的东西。"] },
   { v: "v1.17.0", d: "10-29", one: "说法题六个年级全满：每级 12 道，共 72 道", notes: ["二到六年级也补满了。一年级那批是试点，现在六个年级一共 72 道——不管你在哪个年级的数域里，都会遇到。","每级都是 8 道挑符号、4 道从四句里挑对的那句。挑符号的一眼能答，用来稳概念；四句的那类才考真本事。","错的那三句不是随便编的：一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","每道题都只考该年级课本上写过的东西。教材位置还没核完，等核完再补一句「在哪一册」。"] },
   { v: "v1.16.1", d: "10-29", one: "说法题一年级补满 12 道；长句改上下排；基础档先不出长题", notes: ["一年级的说法题补满了：六道让你挑符号（长方形的面积 = 长 □ 宽 那种），六道让你从四句说法里挑出对的那一句。","那三句错话不是随便编的——一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","长句题换了排法：题干在上、四个选项在下，一句一行。以前挤在右边那一条窄栏里，一句话被切成两截，像断句。","还有一处看不见的：刚进一个图、手感还没上来时（基础档）先不给你出要读四句的长题；连对几道升上来，它才出现。"] },
@@ -28710,7 +28874,7 @@ var UPDATE_NOTE = {
   one: '旧影真的会跟着你了；讲解改成「这个点没学会」才讲。',
   items: [
     '旧影台收下的那一位，从此替你出手、挡刀的就是他。以前来的是路过的影子、抽到谁是谁 —— 收谁都没差别；现在出场的是你认识的人。',
-    '换到别的年级去，他还是会来，但只说一句「又见面了，我还认得你」，不再拿自己那年级的话糊弄你。没收藏过的，裂隙照样有路人扶一把。',
+    '旧影台能换人了：收过之后再点那一格，进去是一排烛台，亮着的那盏是跟着你的这位，点另一盏就能请他（先问一句，再走两屏交接）。地图那格直接写着跟着你的是谁。',
     '讲解变少变准：累计错了三次以上且错多于对，或者这一场同一个点错两次，他才开口；讲过的点不再自动重播，结算页留一行字告诉你去练习阁重听（重听一律四句）。'
   ]
 };
