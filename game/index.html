@@ -2177,6 +2177,11 @@
   .stall-cell:hover { border-color: var(--line-hot); background: #112040; }
   .stall-cell.t-liang { border-color: #2c5675; }
   .stall-cell.t-zhen { border-color: #4a3d1c; background: #151329; }
+  /* 批 B48：旧影台入口卡片（彩蛋格，与六域卡片区分：冷蓝边） */
+  .map-card.spirit-card { border-color: #2b4a72; background: #101c30; }
+  .map-card.spirit-card:hover { border-color: #5f8fc0; }
+  .map-card.spirit-card .mc-name { color: #9ad0ff; }
+  .map-card.spirit-card .mc-desc { color: #6f8bb0; }
   .stall-cell.rift { border-color: #2b4a72; }
   .cell-ico { width: 32px; height: 32px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
     background: #16243d; border: 2px solid #3d5a8a; color: var(--tx-warm); font-weight: bold; clip-path: var(--px-clip); }
@@ -3091,7 +3096,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.12.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.13.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4053,7 +4058,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.12.0
+   数境之旅 · 原型 v1.13.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -4220,6 +4225,8 @@ function defaultState() {
        winCounted 已计入的「百场」档, monthCount{YYYY-M:当月已发}, list[家长愿望单], log[兑换记录], pin 家长口令 } */
     wish: wishDefault(),
     endSeen: 0,              /* 批 END：谢幕卷看过的时间戳（0 = 还没看过） */
+    /* 批 B48：旧影台（英灵图）—— { owned:[{id,name,grade,line,from}], seen, mapDone } */
+    spirit: spiritDefault(),
     /* 背包（批 A4/A5 落地内容）：药品 / 增益 / 材料 */
     bag: { potion: [], buff: [], mat: [] },
     /* 免费洗点次数：开局 1 次 + 每通关一张数域地图 +1（累积不清零）*/
@@ -4246,7 +4253,7 @@ var SLOT_COUNT = 5;                   // 存档位数量
    本机档与外来档并存，能对比、能随时删，比「先覆盖再备份」可靠得多。 */
 var IMPORT_SLOT = 0;
 var SLOT_PREF = 'shujing_slot';       // 当前「使用中」的存档位（自动存档写入此处）
-var SAVE_VER = 23;   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
+var SAVE_VER = 24;   /* 批 B48 旧影台：+spirit（v23 及更早老档读入时补默认，不作废） */   /* 批 END 谢幕卷：+endSeen（v22 及更早老档读入时补 0，不作废） */
 
 function slotStorageKey(n) { return 'shujing_save_' + n; }
 function clampSlot(n) {
@@ -4331,7 +4338,8 @@ function saveGame(slot) {
       codex: G.codex, codexGot: G.codexGot,
       stat: G.stat, achv: G.achv,
       wish: G.wish || wishDefault(),                                    /* 批 W1 心愿卡 */
-      endSeen: G.endSeen || 0                                           /* 批 END 谢幕卷已看 */
+      endSeen: G.endSeen || 0,                                          /* 批 END 谢幕卷已看 */
+      spirit: G.spirit || spiritDefault()                               /* 批 B48 旧影台 */
     }));
   } catch (e) {
     /* 2026-10-19：写失败不再静默 —— 让 saveFailNotice 露一次脸 */
@@ -4469,6 +4477,9 @@ function loadGame(slot) {
       /* 批 W1：心愿卡随存档覆盖（切槽位不残留）。**这一行漏了会导致卡片/口令/愿望单读不回来** ——
          表现：重开游戏后「心愿管理」又让你设口令、心愿匣卡片归零。v1.0.2 修。 */
       G.wish = (d.wish && typeof d.wish === 'object') ? d.wish : wishDefault();
+      /* 批 B48：旧影台（v23 及更早的老档没有这个字段 → 补默认，不作废） */
+      G.spirit = (d.spirit && typeof d.spirit === 'object') ? d.spirit : spiritDefault();
+      if (!Array.isArray(G.spirit.owned)) G.spirit.owned = [];
       /* 批 END：谢幕卷「已看过」的时间戳（只决定首次是否自动播三句，不影响能否重看） */
       G.endSeen = d.endSeen || 0;
       // 老存档兼容：装备栏里若还是老结构（无 affixes）则清空
@@ -17706,6 +17717,38 @@ function renderMap() {
 
   /* 批 END：六域全通后，世界图最右多一扇门（永不打开，只留一句）。 */
   renderEndGate(grid);
+
+  /* 批 B48：旧影台 —— 通关任意一域后出现在最后一格（彩蛋，不是主线） */
+  if (spiritMapUnlocked()) renderSpiritCard(grid);
+}
+
+/* 旧影台入口卡片：不参与 zoneOpen / 不占 ZONES，纯粹多一格 */
+function renderSpiritCard(grid) {
+  var card = document.createElement('div');
+  card.className = 'map-card spirit-card';
+  card.id = 'mapSpirit';
+  var cv = document.createElement('canvas');
+  cv.className = 'mc-ico'; cv.width = 40; cv.height = 40;
+  card.appendChild(cv);
+  var nm = document.createElement('div');
+  nm.className = 'mc-name';
+  nm.textContent = '旧影台';
+  card.appendChild(nm);
+  var ds = document.createElement('div');
+  ds.className = 'mc-desc';
+  var n = (G.spirit && G.spirit.owned) ? G.spirit.owned.length : 0;
+  ds.textContent = n ? ('已遇见 ' + n + ' 位 · 可再去') : '彩蛋 · 这里留过很多人的影子';
+  card.appendChild(ds);
+  /* 图标：一盏灯（简洁，不依赖图片资源） */
+  var ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, 40, 40);
+  ctx.fillStyle = '#1a2742'; ctx.fillRect(2, 2, 36, 36);
+  ctx.fillStyle = '#9ad0ff';
+  ctx.beginPath(); ctx.arc(20, 17, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#5f8fc0'; ctx.fillRect(17, 23, 6, 9);
+  ctx.fillStyle = '#ffd76a'; ctx.fillRect(19, 12, 2, 4);
+  card.onclick = function () { enterSpiritMap(); };
+  grid.appendChild(card);
 }
 
 /* =======================================================================
@@ -18233,6 +18276,9 @@ function stageIcon() {
 /* 说话人 → 台上形象。返回 null 表示不上台（旁白）。 */
 function stageAppearance(who) {
   if (!who || who === '旁白') return null;
+  /* 批 B48：旧影是「没有身体的说话人」—— 字幕上写它的名字，台上不站人（全场退暗）。
+     第一版没这句，台上站的是主角小竹，字幕却写「旧影」，看着像主角在自言自语。 */
+  if (who === '旧影') return null;
   if (typeof G === 'undefined' || !G || !G.player) return null;
   var heroName = G.player.name || '小竹';
   if (who === '小竹' || who === heroName) {
@@ -18788,7 +18834,7 @@ function startBattle(zone, kind, monIdx) {
     }
   }
   /* 批 C1：遭遇即入图鉴（战斗与地图点击都汇聚到这里）——裂隙怪不入图鉴 */
-  if (!zone.rift) codexMark('mon', zone.id + '/' + m.name);
+  if (!zone.rift && !zone.spiritMap) codexMark('mon', zone.id + '/' + m.name);
 
   /* 批 3f：遭遇分层投放（2026-10-16 用户拍板）—— 本场「新题」配额：
      守律者 2 道、精英 1 道、普通小怪 0 道（课内池）。
@@ -20723,6 +20769,8 @@ function resolveAnswer(correct, timeout) {
 
   if (correct) {
     B.correctCount++;
+    /* 批 B48：旧影台里答对满 12 道也收场（不让「故意错」成为唯一出路） */
+    if (B.spiritMap && B.correctCount >= SPIRIT_MAP.cleanCorrect) spiritMapClean();
     B.combo++;
     B.roundCorrect = 1;
     /* 批 3b-2：隙尘 —— 只在裂隙里挣；题目难度越高掉越多（挑战×1.5 / 进阶×1.2），
@@ -21063,6 +21111,8 @@ function resolveAnswer(correct, timeout) {
 
 /* ---------- 血尽处理（批 A4）：有重算符就给一次「重来」 ---------- */
 function handleHeroDown() {
+  /* 批 B48：旧影台里血量归零不判失败 —— 这正是它现身的时刻 */
+  if (B && B.spiritMap) { spiritMapFall(); return; }
   stopTimer();
   closeItemPop();
   if (bagCountOf('chongsuanFu') > 0 && !B.usedRevive) {
@@ -22996,6 +23046,9 @@ function achvBanner(a) {
 var WISH_LIST_MAX = 3;      // 心愿单最多 3 条（家长填）
 var WISH_WIN_STEP = 100;    // 每累计 100 场胜利 1 张
 var WISH_MONTHLY_CAP = 2;   // 可重复来源每月最多 2 张
+
+/* 批 B48：旧影台存档结构 —— owned 存「遇见过的旧影」，from 区分来源（preset / alt 存档） */
+function spiritDefault() { return { owned: [], seen: 0, mapDone: 0 }; }
 
 function wishDefault() {
   return {
@@ -25458,6 +25511,134 @@ function maybeSpiritHelp() {
   } catch (e) { return false; }   /* 彩蛋性质，出错绝不打断战斗 */
 }
 
+/* =======================================================================
+   批 B48 · 旧影台（英灵图）—— 2026-10-29
+   -----------------------------------------------------------------------
+   一句话：一场打不完的仗。你答对够多、然后撑不住倒下的那一刻，它出现了，
+   讲完自己的来历，替你收场，然后把自己留下。
+
+   四条设计约束（讨论定案，改之前先读）：
+   ① **Boss 血厚到打不完**是设计，不是 bug（血量 ≈ 60~120 题）。
+   ② **不判失败**：血量归零时走本文件的收尾，不进 handleHeroDown 的失败结算
+      —— 那里挂着掉落 / 连击 / 成就 / stat.battles 一整串，碰它就是引战。
+   ③ **触发点在「血被打空那一刻」**，不是「答错 N 道」。答错→掉血→倒下是同一条因果，
+      而且这样孩子不需要为了触发而故意答错。
+   ④ **一路答对也拿得到**（答对满 12 道）。否则孩子会总结出「故意错才能结束」——
+      那等于在教「故意错能换来东西」。12 道同时充当「防卡死」上限。
+   ======================================================================= */
+var SPIRIT_MAP = {
+  id: 'spiritmap',
+  needCorrect: 8,        /* 门槛：倒下时至少要答对这么多，它才认你 */
+  cleanCorrect: 12,      /* 一路答对也收场（同时是防卡死上限） */
+  bossBase: 2400,        /* 血量底，再按年级加 —— 打不完是设计 */
+  bossPerGrade: 600
+};
+
+var SPIRIT_SCRIPT = {
+  /* 主路径：撑不住倒下（书院「留一盏」的规矩） */
+  down: [
+    { who: '旧影', text: '你答到第八道，我听见了。' },
+    { who: '旧影', text: '书院从前的规矩：先走的人，要在路口留一盏。' },
+    { who: '旧影', text: '我留的那盏，还亮着。' },
+    { who: '旧影', text: '这一盏给你 —— 别吹灭。' }
+  ],
+  /* 一路答对：它不出手，但仍然把灯留下 */
+  clean: [
+    { who: '旧影', text: '十二道，你一道都没错。' },
+    { who: '旧影', text: '这一程你没让我出手。那我就不出手了。' },
+    { who: '旧影', text: '书院的规矩照旧：先走的人，在路口留一盏。' },
+    { who: '旧影', text: '收下这个。路上用得上。' }
+  ],
+  /* 来得太早：它不出现（门槛的意义） */
+  early: [
+    { who: '旁白', text: '旧影台很静。你退了出来。' },
+    { who: '旁白', text: '（走得太早的人，它还不会认。）' }
+  ]
+};
+
+/* 入口解锁：通关任意一域后出现 */
+function spiritMapUnlocked() { return (G.cleared || []).length >= 1; }
+
+/* 造一张「只给旧影台用」的临时地图 —— 不写进 ZONES，不参与 zoneOpen */
+function spiritMapZone() {
+  var g = playerGrade();
+  var src = ZONES[Math.max(0, Math.min(5, g - 1))];     /* 用同龄域的题库 */
+  return {
+    id: 'spiritmap', name: '旧影台', grade: g, spiritMap: 1,
+    knowledge: (src.knowledge || []).slice(),
+    monsters: [{ name: '无名旧影', type: 'guard', hp: 0, skill: 'heavy' }],
+    progress: 0, defeated: []
+  };
+}
+
+function enterSpiritMap() {
+  if (!spiritMapUnlocked()) { appToast('通关一个数域后才会出现', '#7f8fa8'); return; }
+  var z = spiritMapZone();
+  startBattle(z, 'monster', 0);
+  B.spiritMap = 1;
+  B.spiritEnding = 0;
+  var big = SPIRIT_MAP.bossBase + SPIRIT_MAP.bossPerGrade * (z.grade || 1);
+  B.enemy.name = '无名旧影';
+  B.enemy.hp = B.enemy.maxHp = big;
+  if (typeof updateHPBars === 'function') updateHPBars();
+  flashBattleNote('它没有名字。你也打不完它 —— 先答几道看看。');
+}
+
+/* 抽一位「旧影」：优先本机其他存档里的化名（真存在的人，比预置台词有分量） */
+function spiritPickRecord() {
+  var alts = [];
+  for (var i = 1; i <= 5; i++) {
+    try {
+      var raw = localStorage.getItem(slotStorageKey(i));
+      if (!raw) continue;
+      var d = JSON.parse(raw);
+      var nm = d && d.player && d.player.name;
+      if (nm && nm !== (G.player && G.player.name) && alts.indexOf(nm) < 0) alts.push(nm);
+    } catch (e) {}
+  }
+  if (alts.length && Math.random() < 0.5) {
+    var a = alts[Math.floor(Math.random() * alts.length)];
+    return { id: 'alt_' + a, name: a, grade: playerGrade(), line: '这条路我也走过。别急。', from: 'alt' };
+  }
+  var sp = spiritPick(playerGrade());
+  return { id: 'sp_' + sp.alias, name: sp.alias, grade: sp.grade, line: sp.phrase, from: 'preset' };
+}
+
+/* 收尾：解锁一条旧影 + 存盘 + 回图（不进 endBattle，零副作用） */
+function spiritFinish() {
+  var rec = spiritPickRecord();
+  var dup = (G.spirit.owned || []).some(function (x) { return x.id === rec.id; });
+  if (!dup) G.spirit.owned.push(rec);
+  G.spirit.seen = Date.now();
+  if (!G.spirit.mapDone) G.spirit.mapDone = Date.now();
+  B.active = false;
+  saveGame();
+  show('screen-map');
+  renderMap();
+  appToast('旧影收下了 —— ' + rec.name + '（' + rec.grade + ' 年级）', '#ffd76a');
+}
+
+/* 倒下：撑住就演「主路径」，太早就退出来 */
+function spiritMapFall() {
+  if (B.spiritEnding) return;
+  B.spiritEnding = 1;
+  B.active = false;
+  stopTimer();
+  var ok = (B.correctCount || 0) >= SPIRIT_MAP.needCorrect;
+  playStory(ok ? SPIRIT_SCRIPT.down : SPIRIT_SCRIPT.early, function () {
+    if (ok) spiritFinish(); else { show('screen-map'); renderMap(); }
+  });
+}
+
+/* 一路答对：到 12 道收场（同时防卡死） */
+function spiritMapClean() {
+  if (B.spiritEnding) return;
+  B.spiritEnding = 1;
+  B.active = false;
+  stopTimer();
+  playStory(SPIRIT_SCRIPT.clean, function () { spiritFinish(); });
+}
+
 /* ---------- 掉落（批 A4）：数域越靠后，药品 / 增益越好 ---------- */
 /* ---------- 装备生成与背包 API（批 A5） ---------- */
 var GEAR_BAG_CAP = 40;   // 背包装备上限，满了自动折半卖成算珠
@@ -26217,6 +26398,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.13.0", d: "10-29", one: "大地图多一格「旧影台」：一场打不完的仗，倒下那刻它接手", notes: ["通关任意一个数域之后，世界图上多出一格「旧影台」。","进去那只影子怎么也打不完：血条厚得不讲道理。你先答对八道，它就在旁边看着。","等你真的撑不住、血被打空的那一刻，它现身，讲完自己为什么留在这里，然后替你收场，留下一缕给你。","一路答对也不用担心：答到十二道，它会说「这一程你没让我出手」，照样把灯留下。两种走法都拿得到 —— 不用为了看它而故意答错。","拿到的那一位会记在旧影台里。这一版它还不进裂隙，那一步放在下一批。"] },
   { v: "v1.12.0", d: "10-29", one: "裂隙残血时会有「先来过的人」替你削一刀、挡半刀", notes: ["打数境裂隙时，血掉到三成以下，隙缝里会探出一道影子——那是以前打过这里的同龄孩子留下的。它替你削掉敌人一刀（约 6% 血），并替你挡掉下一次伤害的一半。","一位前辈每场只出现一次。而且它不抢你的最后一击：哪怕那一刀够把怪打死，也会给怪留一口气，收尾永远留给你。","它说的话都很短，比如「这道我卡过三回，第四回就通了」「慢一点，没人催你」——你只会遇到同年级的人。","只在裂隙生效。主线和野图没有——那里还没有「别人来过」的痕迹。"] },
   { v: "v1.11.1.1", d: "10-29", one: "成就页那句说明补上「集齐 13 枚再得 1 张心愿卡」", notes: ["成就页顶部那条总进度条旁边，现在写清了终点：13 枚集齐，会再得 1 张心愿卡。这条信息本来只在书院心愿匣里提过一句，孩子在成就页看不到。","13 枚真的收齐时，这句会换成「全部点亮 —— 集齐奖励：1 张心愿卡」，从「承诺」变成「告知」。","句子里的「13」是按成就条数算出来的，以后加成就它会自己跟着变。"] },
   { v: "v1.11.1", d: "10-29", one: "成就页顶上多了一条总进度条，收齐几枚一眼看得见", notes: ["人物 → 成就，原来顶上只有一行「已达成 3 / 13（23%）」，得读数字才知道进度。现在这行下面多了一条横贯面板的细条，攒几枚就亮几成。","这条比下面每一枚自己的小条要粗一点（8px），并且外面有一圈暗描边，所以不会和「这一枚还差多少」混在一起。","13 枚全收齐时，整条会转成金色 —— 和单条成就达成时的颜色一样，不用再数还剩几个。"] },
@@ -26291,13 +26473,14 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.12.0',
+  ver: 'v1.13.0',
   date: '2026-10-29',
-  one: '裂隙里快撑不住的时候，会有「先来过这里的人」替你削一刀。',
+  one: '大地图多了一格「旧影台」：一场打不完的仗，撑到倒下时有人接手。',
   items: [
-    '在数境裂隙里，血掉到三成以下时，隙缝里会探出一道影子——那是以前打过这里的孩子留下的，它替你削掉敌人一刀（约 6% 血），还替你挡掉下一次伤害的一半。',
-    '一位前辈每场只出现一次，而且不会抢你的最后一击：哪怕它那一刀足够打死怪，也会给怪留一口气，收尾永远留给你。',
-    '这条只在裂隙生效。主线和野图不会有——那里没有「别人来过」的痕迹。'
+    '通关任意一个数域后，世界图上会多出一格「旧影台」。进去以后会发现，那只影子怎么也打不完——它的血条厚得不讲道理。',
+    '你先答对八道，它就在旁边看着。等你真的撑不住、血被打空的那一刻，它会现身，讲完自己为什么留在这里，然后替你收场。',
+    '一路答对也没关系：答到十二道，它会说「这一程你没让我出手」，照样把灯留给你。两种走法都拿得到，不用为了看它而故意答错。',
+    '拿到的那一位会记在旧影台里。这一版它还不进裂隙——那一步放在下一批。'
   ]
 };
 
