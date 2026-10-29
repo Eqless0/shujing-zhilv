@@ -343,12 +343,16 @@ function makeCtx(over) {
 
 /* ---------- arith 可视化类 ---------- */
 function makeArith(decl, d, ctx) {
-  const names = Object.keys(decl.vars);
-  const ctxKeys = Object.keys(ctx);
+  /* 与 game/index.html 的同名函数行为一致：静态题（vars 为空）不能让参数表出现空位，
+     否则生成 `function (,d,rnd,…)` → 语法错误，「定理与定律」这类纯文字题全部报废。 */
+  const names = Object.keys(decl.vars || {});
+  const ctxKeys = Object.keys(ctx || {});
   const ctxArgs = ctxKeys.map(k => ctx[k]);
   const cache = {};
+  const pVars = names.length ? names.join(',') : '_none';
+  const pCtx = ctxKeys.length ? ctxKeys.join(',') : '_ctx';
   function ce(expr) {
-    if (!cache[expr]) cache[expr] = new Function(names.join(','), 'd', ctxKeys.join(','), 'return (' + expr + ');');
+    if (!cache[expr]) cache[expr] = new Function(pVars, 'd', pCtx, 'return (' + expr + ');');
     return cache[expr];
   }
   function call(fn, scope) { return fn.apply(null, names.map(n => scope[n]).concat([d], ctxArgs)); }
@@ -1483,6 +1487,44 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
       }
     ]
   },
+  "sayG1": {
+    "label": "定理与定律",
+    "grade": 1,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_ten",
+        "n": "十里有几个一",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个十里面有 □ 个一。",
+        "ans": "'10'",
+        "type": "choice",
+        "options": [
+          "1",
+          "10",
+          "100"
+        ]
+      },
+      {
+        "id": "t2_shape",
+        "n": "谁说得对（图形）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'长方形有 4 条边'",
+        "type": "choice",
+        "options": [
+          "长方形有 4 条边",
+          "长方形有 3 条边",
+          "正方形有 5 条边",
+          "圆有 4 个角"
+        ]
+      }
+    ]
+  },
   "divTable": {
     "label": "表内除法",
     "grade": 2,
@@ -2325,6 +2367,44 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "n": "从上面看到几个正方形",
         "kind": "code",
         "code": "function (d) {\n          var a = rnd(2, 3), b = rnd(2, 3);\n          return { q: '把 ' + a + '×' + b + ' 个小正方体摆成一层（只有一层），从上面看有几个小正方形？', ans: a * b };\n      }"
+      }
+    ]
+  },
+  "sayG2": {
+    "label": "定理与定律",
+    "grade": 2,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_m",
+        "n": "米和厘米",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "1 米 = □ 厘米。",
+        "ans": "'100'",
+        "type": "choice",
+        "options": [
+          "10",
+          "100",
+          "1000"
+        ]
+      },
+      {
+        "id": "t2_mul",
+        "n": "谁说得对（乘法）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'3 × 4 表示 4 个 3 相加'",
+        "type": "choice",
+        "options": [
+          "3 × 4 表示 4 个 3 相加",
+          "3 × 4 表示 3 + 4",
+          "0 可以做除数",
+          "1 时 = 100 分"
+        ]
       }
     ]
   },
@@ -3271,6 +3351,45 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "n": "全班一共多少人",
         "kind": "code",
         "code": "function (d) {\n          function tableHtml(acts, mb, gr) {\n            var h = '<table class=\"q-table\"><caption>三（1）班同学最喜欢的活动（人）</caption><tr><th>性别</th>';\n            var i;\n            for (i = 0; i < acts.length; i++) h += '<th>' + acts[i] + '</th>';\n            h += '</tr><tr><th>男生</th>';\n            for (i = 0; i < mb.length; i++) h += '<td>' + mb[i] + '</td>';\n            h += '</tr><tr><th>女生</th>';\n            for (i = 0; i < gr.length; i++) h += '<td>' + gr[i] + '</td>';\n            h += '</tr></table>';\n            return h;\n          }\n          var ACTS = ['跳绳', '踢球', '唱歌'];\n          var MB = [rnd(5, 12), rnd(5, 12), rnd(5, 12)];\n          var GR = [rnd(5, 12), rnd(5, 12), rnd(5, 12)];\n          var QT = '三（1）班一共有多少人？';\n          return { q: QT,\n                   ans: MB[0] + MB[1] + MB[2] + GR[0] + GR[1] + GR[2],\n                   qHtml: '<span>' + QT + '</span>' + tableHtml(ACTS, MB, GR) };\n      }"
+      }
+    ]
+  },
+  "sayG3": {
+    "label": "定理与定律",
+    "grade": 3,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_area",
+        "n": "面积公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方形的面积 = 长 □ 宽，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_peri",
+        "n": "谁说得对（周长）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'长方形的周长 =（长 + 宽）× 2'",
+        "type": "choice",
+        "options": [
+          "长方形的周长 =（长 + 宽）× 2",
+          "长方形的周长 = 长 × 宽",
+          "1 米 = 10 厘米",
+          "平年的二月有 29 天"
+        ]
       }
     ]
   },
@@ -4801,6 +4920,45 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
       }
     ]
   },
+  "sayG4": {
+    "label": "定理与定律",
+    "grade": 4,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_comm",
+        "n": "加法交换律",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "a + b = b □ a，□ 里应填什么？",
+        "ans": "'+'",
+        "type": "choice",
+        "options": [
+          "+",
+          "−",
+          "×",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_tri",
+        "n": "谁说得对（三角形）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'三角形内角和是 180°'",
+        "type": "choice",
+        "options": [
+          "三角形内角和是 180°",
+          "三角形内角和是 360°",
+          "平行四边形只有一组对边平行",
+          "1 公顷 = 100 平方米"
+        ]
+      }
+    ]
+  },
   "decimalDiv": {
     "label": "小数除法",
     "grade": 5,
@@ -5890,6 +6048,45 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
       }
     ]
   },
+  "sayG5": {
+    "label": "定理与定律",
+    "grade": 5,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_vol",
+        "n": "体积公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方体的体积 = 长 × 宽 □ 高，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_frac",
+        "n": "谁说得对（分数）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'分子分母同时乘 2，分数的大小不变'",
+        "type": "choice",
+        "options": [
+          "分子分母同时乘 2，分数的大小不变",
+          "1 是质数",
+          "体积单位相邻之间是 100 倍",
+          "分数除法要先通分"
+        ]
+      }
+    ]
+  },
   "circle": {
     "label": "圆的周长与面积",
     "grade": 6,
@@ -6689,6 +6886,45 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "hard": true,
         "kind": "code",
         "code": "function (d) {\n          var pool = [\n            { labels: ['篮球', '足球', '乒乓'], pct: [40, 35, 25] },\n            { labels: ['篮球', '足球', '乒乓'], pct: [45, 30, 25] },\n            { labels: ['篮球', '足球', '乒乓'], pct: [50, 30, 20] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [40, 30, 20, 10] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [35, 30, 20, 15] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [45, 25, 20, 10] }\n          ];\n          /* 每组的百分比互不相同、和为 100 —— 「哪块最大」「差百分之几」才唯一 */\n          var src = pool[rnd(0, d === 0 ? 2 : pool.length - 1)];\n          var labels = src.labels, pct = src.pct;\n          /* 总人数取 200/400/500：任何 5% 的倍数乘上去都是整数 */\n          var total = [200, 400, 500][rnd(0, 2)];\n          var fig = { t: 'pie', title: '六(2)班 ' + total + ' 人最喜欢的球类', labels: labels, values: pct, unit: '%' };\n          var k = pct.length - 1;\n          return { q: '喜欢' + labels[k] + '的有多少人？',\n                   ans: pct[k] * total / 100, fig: fig };\n      }"
+      }
+    ]
+  },
+  "sayG6": {
+    "label": "定理与定律",
+    "grade": 6,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_circ",
+        "n": "圆周长公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆的周长 = π □ 直径，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_pct",
+        "n": "谁说得对（百分数）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'百分数后面不带单位'",
+        "type": "choice",
+        "options": [
+          "百分数后面不带单位",
+          "π 正好等于 3.14",
+          "比的后项可以是 0",
+          "半径 2 的圆，周长和面积相等"
+        ]
       }
     ]
   }

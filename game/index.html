@@ -1053,6 +1053,20 @@
     padding: 0.75rem; cursor: pointer; text-align: center;
   }
   .q-opt:hover { background: #26406e; border-color: #8fb0e0; }
+  /* 批 B53：整句选项（定理与定律的「下面哪一句是对的」）——
+     一句话塞进 2×2 的小格子会被折成竖排（667×375 实测一句话折成五行），读不成句。
+     超过 8 个字的选项一律改单列、左对齐、字号降一档。 */
+  .q-opts.long { grid-template-columns: 1fr; gap: 0.375rem; }
+  .q-opts.long .q-opt {
+    text-align: left; font-weight: normal; line-height: 1.5;
+    font-size: 0.9375rem; padding: 0.5rem 0.75rem;
+  }
+  /* 短屏：单列四行加起来比 2×2 高，667×375 实测最后一个选项底边 373（屏幕 375），
+     贴着边还溢出答题区 2px。压字号与内边距把它收回框内。 */
+  @media (max-height: 460px) {
+    .q-opts.long { gap: 0.25rem; }
+    .q-opts.long .q-opt { font-size: 0.8125rem; padding: 0.3rem 0.55rem; line-height: 1.4; }
+  }
   .q-opt.right { background: #2f6b45; border-color: #4fbf72; }
   .q-opt.wrong { background: #6b2f2f; border-color: #d4534e; }
   .q-opt:disabled { cursor: default; }
@@ -3160,7 +3174,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.15.2</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.16.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4142,7 +4156,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.15.2
+   数境之旅 · 原型 v1.16.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -7811,6 +7825,44 @@ var __DECL = {
       }
     ]
   },
+  "sayG1": {
+    "label": "定理与定律",
+    "grade": 1,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_ten",
+        "n": "十里有几个一",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个十里面有 □ 个一。",
+        "ans": "'10'",
+        "type": "choice",
+        "options": [
+          "1",
+          "10",
+          "100"
+        ]
+      },
+      {
+        "id": "t2_shape",
+        "n": "谁说得对（图形）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'长方形有 4 条边'",
+        "type": "choice",
+        "options": [
+          "长方形有 4 条边",
+          "长方形有 3 条边",
+          "正方形有 5 条边",
+          "圆有 4 个角"
+        ]
+      }
+    ]
+  },
   "divTable": {
     "label": "表内除法",
     "grade": 2,
@@ -8653,6 +8705,44 @@ var __DECL = {
         "n": "从上面看到几个正方形",
         "kind": "code",
         "code": "function (d) {\n          var a = rnd(2, 3), b = rnd(2, 3);\n          return { q: '把 ' + a + '×' + b + ' 个小正方体摆成一层（只有一层），从上面看有几个小正方形？', ans: a * b };\n      }"
+      }
+    ]
+  },
+  "sayG2": {
+    "label": "定理与定律",
+    "grade": 2,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_m",
+        "n": "米和厘米",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "1 米 = □ 厘米。",
+        "ans": "'100'",
+        "type": "choice",
+        "options": [
+          "10",
+          "100",
+          "1000"
+        ]
+      },
+      {
+        "id": "t2_mul",
+        "n": "谁说得对（乘法）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'3 × 4 表示 4 个 3 相加'",
+        "type": "choice",
+        "options": [
+          "3 × 4 表示 4 个 3 相加",
+          "3 × 4 表示 3 + 4",
+          "0 可以做除数",
+          "1 时 = 100 分"
+        ]
       }
     ]
   },
@@ -9599,6 +9689,45 @@ var __DECL = {
         "n": "全班一共多少人",
         "kind": "code",
         "code": "function (d) {\n          function tableHtml(acts, mb, gr) {\n            var h = '<table class=\"q-table\"><caption>三（1）班同学最喜欢的活动（人）</caption><tr><th>性别</th>';\n            var i;\n            for (i = 0; i < acts.length; i++) h += '<th>' + acts[i] + '</th>';\n            h += '</tr><tr><th>男生</th>';\n            for (i = 0; i < mb.length; i++) h += '<td>' + mb[i] + '</td>';\n            h += '</tr><tr><th>女生</th>';\n            for (i = 0; i < gr.length; i++) h += '<td>' + gr[i] + '</td>';\n            h += '</tr></table>';\n            return h;\n          }\n          var ACTS = ['跳绳', '踢球', '唱歌'];\n          var MB = [rnd(5, 12), rnd(5, 12), rnd(5, 12)];\n          var GR = [rnd(5, 12), rnd(5, 12), rnd(5, 12)];\n          var QT = '三（1）班一共有多少人？';\n          return { q: QT,\n                   ans: MB[0] + MB[1] + MB[2] + GR[0] + GR[1] + GR[2],\n                   qHtml: '<span>' + QT + '</span>' + tableHtml(ACTS, MB, GR) };\n      }"
+      }
+    ]
+  },
+  "sayG3": {
+    "label": "定理与定律",
+    "grade": 3,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_area",
+        "n": "面积公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方形的面积 = 长 □ 宽，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_peri",
+        "n": "谁说得对（周长）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'长方形的周长 =（长 + 宽）× 2'",
+        "type": "choice",
+        "options": [
+          "长方形的周长 =（长 + 宽）× 2",
+          "长方形的周长 = 长 × 宽",
+          "1 米 = 10 厘米",
+          "平年的二月有 29 天"
+        ]
       }
     ]
   },
@@ -11129,6 +11258,45 @@ var __DECL = {
       }
     ]
   },
+  "sayG4": {
+    "label": "定理与定律",
+    "grade": 4,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_comm",
+        "n": "加法交换律",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "a + b = b □ a，□ 里应填什么？",
+        "ans": "'+'",
+        "type": "choice",
+        "options": [
+          "+",
+          "−",
+          "×",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_tri",
+        "n": "谁说得对（三角形）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'三角形内角和是 180°'",
+        "type": "choice",
+        "options": [
+          "三角形内角和是 180°",
+          "三角形内角和是 360°",
+          "平行四边形只有一组对边平行",
+          "1 公顷 = 100 平方米"
+        ]
+      }
+    ]
+  },
   "decimalDiv": {
     "label": "小数除法",
     "grade": 5,
@@ -12218,6 +12386,45 @@ var __DECL = {
       }
     ]
   },
+  "sayG5": {
+    "label": "定理与定律",
+    "grade": 5,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_vol",
+        "n": "体积公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方体的体积 = 长 × 宽 □ 高，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_frac",
+        "n": "谁说得对（分数）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'分子分母同时乘 2，分数的大小不变'",
+        "type": "choice",
+        "options": [
+          "分子分母同时乘 2，分数的大小不变",
+          "1 是质数",
+          "体积单位相邻之间是 100 倍",
+          "分数除法要先通分"
+        ]
+      }
+    ]
+  },
   "circle": {
     "label": "圆的周长与面积",
     "grade": 6,
@@ -13017,6 +13224,45 @@ var __DECL = {
         "hard": true,
         "kind": "code",
         "code": "function (d) {\n          var pool = [\n            { labels: ['篮球', '足球', '乒乓'], pct: [40, 35, 25] },\n            { labels: ['篮球', '足球', '乒乓'], pct: [45, 30, 25] },\n            { labels: ['篮球', '足球', '乒乓'], pct: [50, 30, 20] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [40, 30, 20, 10] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [35, 30, 20, 15] },\n            { labels: ['篮球', '足球', '乒乓', '羽毛'], pct: [45, 25, 20, 10] }\n          ];\n          /* 每组的百分比互不相同、和为 100 —— 「哪块最大」「差百分之几」才唯一 */\n          var src = pool[rnd(0, d === 0 ? 2 : pool.length - 1)];\n          var labels = src.labels, pct = src.pct;\n          /* 总人数取 200/400/500：任何 5% 的倍数乘上去都是整数 */\n          var total = [200, 400, 500][rnd(0, 2)];\n          var fig = { t: 'pie', title: '六(2)班 ' + total + ' 人最喜欢的球类', labels: labels, values: pct, unit: '%' };\n          var k = pct.length - 1;\n          return { q: '喜欢' + labels[k] + '的有多少人？',\n                   ans: pct[k] * total / 100, fig: fig };\n      }"
+      }
+    ]
+  },
+  "sayG6": {
+    "label": "定理与定律",
+    "grade": 6,
+    "book": "rj",
+    "bkNote": "",
+    "variants": [
+      {
+        "id": "t1_circ",
+        "n": "圆周长公式",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆的周长 = π □ 直径，□ 里应填什么？",
+        "ans": "'×'",
+        "type": "choice",
+        "options": [
+          "×",
+          "+",
+          "−",
+          "÷"
+        ]
+      },
+      {
+        "id": "t2_pct",
+        "n": "谁说得对（百分数）",
+        "kind": "arith",
+        "hard": true,
+        "vars": {},
+        "tpl": "下面哪一句是对的？",
+        "ans": "'百分数后面不带单位'",
+        "type": "choice",
+        "options": [
+          "百分数后面不带单位",
+          "π 正好等于 3.14",
+          "比的后项可以是 0",
+          "半径 2 的圆，周长和面积相等"
+        ]
       }
     ]
   }
@@ -14207,6 +14453,55 @@ var KNOWLEDGE = {
       { id: "num2", n: "末尾那块的人数", hard: true, gen: function (d) { return __dg(__DECL["pieChart"].variants[3], d); } }
     ]
   }
+,
+  sayG1: {
+    label: "定理与定律", grade: 1, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_ten", n: "十里有几个一", gen: function (d) { return __dg(__DECL["sayG1"].variants[0], d); } },
+      { id: "t2_shape", n: "谁说得对（图形）", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[1], d); } }
+    ]
+  },
+  sayG2: {
+    label: "定理与定律", grade: 2, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_m", n: "米和厘米", gen: function (d) { return __dg(__DECL["sayG2"].variants[0], d); } },
+      { id: "t2_mul", n: "谁说得对（乘法）", hard: true, gen: function (d) { return __dg(__DECL["sayG2"].variants[1], d); } }
+    ]
+  },
+  sayG3: {
+    label: "定理与定律", grade: 3, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_area", n: "面积公式", gen: function (d) { return __dg(__DECL["sayG3"].variants[0], d); } },
+      { id: "t2_peri", n: "谁说得对（周长）", hard: true, gen: function (d) { return __dg(__DECL["sayG3"].variants[1], d); } }
+    ]
+  },
+  sayG4: {
+    label: "定理与定律", grade: 4, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_comm", n: "加法交换律", gen: function (d) { return __dg(__DECL["sayG4"].variants[0], d); } },
+      { id: "t2_tri", n: "谁说得对（三角形）", hard: true, gen: function (d) { return __dg(__DECL["sayG4"].variants[1], d); } }
+    ]
+  },
+  sayG5: {
+    label: "定理与定律", grade: 5, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_vol", n: "体积公式", gen: function (d) { return __dg(__DECL["sayG5"].variants[0], d); } },
+      { id: "t2_frac", n: "谁说得对（分数）", hard: true, gen: function (d) { return __dg(__DECL["sayG5"].variants[1], d); } }
+    ]
+  },
+  sayG6: {
+    label: "定理与定律", grade: 6, book: "rj",
+    bkNote: "",
+    variants: [
+      { id: "t1_circ", n: "圆周长公式", gen: function (d) { return __dg(__DECL["sayG6"].variants[0], d); } },
+      { id: "t2_pct", n: "谁说得对（百分数）", hard: true, gen: function (d) { return __dg(__DECL["sayG6"].variants[1], d); } }
+    ]
+  }
 };
 
 /* =======================================================================
@@ -14222,6 +14517,14 @@ var KNOWLEDGE = {
    而且「缺哪个前置」正好就是该回头补课的目标 —— 回头引导直接从这条链上取。
    ======================================================================= */
 var KNOWLEDGE_PRE = {
+  /* 批 B53：定理与定律（说法题）—— 前置挂该年级的核心数值知识点。
+     它们本身是「把学过的东西说清楚」，没有前置就等于任何年级都够得着。 */
+  sayG1:       ['add20'],
+  sayG2:       ['mulTable'],
+  sayG3:       ['mulMulti'],
+  sayG4:       ['mathLaw'],
+  sayG5:       ['volume'],
+  sayG6:       ['circle'],
   /* 一年级：从「20以内加法」长出来 */
   add20:       [],
   sub20:       ['add20'],
@@ -15496,9 +15799,14 @@ var DECL_CTX = { rnd: rnd, pick: pick, gridHTML: gridHTML, gridPlain: gridPlain,
 
 /* arith 可视化出题：vars 区间支持依赖其他变量与难度 d；tpl 占位 {变量}；ans 表达式 */
 function makeArith(decl, d, ctx) {
-  var names = Object.keys(decl.vars), ctxKeys = Object.keys(ctx), cache = {};
+  /* 批 B53：静态题（vars 为空）支持。
+     原来直接 names.join(',') —— 没有变量时生成 `function (,d,rnd,...)`，参数表开头就一个逗号，
+     语法错误 → 「定理与定律」这类纯文字题全军覆没。ctx 为空时同理。
+     给个占位参数名让它合法，ans/tpl 不引用它即可。 */
+  var names = Object.keys(decl.vars || {}), ctxKeys = Object.keys(ctx || {}), cache = {};
+  var pVars = names.length ? names.join(',') : '_none', pCtx = ctxKeys.length ? ctxKeys.join(',') : '_ctx';
   function ce(expr) {
-    if (!cache[expr]) cache[expr] = new Function(names.join(','), 'd', ctxKeys.join(','), 'return (' + expr + ');');
+    if (!cache[expr]) cache[expr] = new Function(pVars, 'd', pCtx, 'return (' + expr + ');');
     return cache[expr];
   }
   function call(fn, vars) { return fn.apply(null, names.map(function (n) { return vars[n]; }).concat([d], ctxKeys.map(function (k) { return ctx[k]; }))); }
@@ -16234,7 +16542,7 @@ var ZONES = [
   {
     id: 'mengya', name: '萌芽原野', grade: 1, icon: 'grass',
     desc: '春草初生之处，数律只余最浅一层',
-    knowledge: ['add20', 'sub20', 'add100', 'sub100', 'compare', 'evenodd', 'make10', 'addCarry1', 'subBorrow2', 'pattern', 'solidShape', 'flatShape', 'sortClass'],
+    knowledge: ['add20', 'sub20', 'add100', 'sub100', 'compare', 'evenodd', 'make10', 'addCarry1', 'subBorrow2', 'pattern', 'solidShape', 'flatShape', 'sortClass', 'sayG1'],
     // 怪物序列：依次挑战，最后是守律者
     monsters: [
       { type: 'grass', pal: 'leaf', name: '草精', hp: 40, skill: 'confusion' },
@@ -16270,7 +16578,7 @@ var ZONES = [
   {
     id: 'fengche', name: '风车水乡', grade: 2, icon: 'water',
     desc: '青瓦白墙，风车与渡船',
-    knowledge: ['mulTable', 'divTable', 'timeRead', 'money', 'levelLen', 'angleBasic', 'num10000', 'observePos'],
+    knowledge: ['mulTable', 'divTable', 'timeRead', 'money', 'levelLen', 'angleBasic', 'num10000', 'observePos', 'sayG2'],
     monsters: [
       { type: 'frog', pal: 'kappa', acc: 'dish', name: '河童', hp: 60, skill: 'heavy' },
       { type: 'butterfly', pal: 'tide', acc: 'net', name: '精英·渔蝶', hp: 81, skill: 'silence', elite: true },
@@ -16297,7 +16605,7 @@ var ZONES = [
   {
     id: 'chilun', name: '齿轮山谷', grade: 3, icon: 'gear',
     desc: '云雾山谷，巨大的青铜齿轮',
-    knowledge: ['mulMulti', 'divMulti', 'perimeter', 'area', 'unitConv', 'timeUnit', 'mulTwo', 'calendar', 'direction8', 'twoWayTable'],
+    knowledge: ['mulMulti', 'divMulti', 'perimeter', 'area', 'unitConv', 'timeUnit', 'mulTwo', 'calendar', 'direction8', 'twoWayTable', 'sayG3'],
     monsters: [
       { type: 'puppet', pal: 'rust', acc: 'gear', name: '锈齿傀儡', hp: 80, skill: 'heavy' },
       { type: 'frog', pal: 'copper', acc: 'rivets', name: '精英·铜皮蛙', hp: 109, skill: 'drain', elite: true },
@@ -16322,7 +16630,7 @@ var ZONES = [
   {
     id: 'yunding', name: '云顶书院', grade: 4, icon: 'book',
     desc: '云海之上的古代学院',
-    knowledge: ['mixOps', 'mathLaw', 'decimalAdd', 'decimalSub', 'angle', 'bigNum', 'triangle', 'average', 'areaUnit', 'divTwo', 'paraTrap', 'mathOptimize', 'symmetry', 'view4', 'barChart'],
+    knowledge: ['mixOps', 'mathLaw', 'decimalAdd', 'decimalSub', 'angle', 'bigNum', 'triangle', 'average', 'areaUnit', 'divTwo', 'paraTrap', 'mathOptimize', 'symmetry', 'view4', 'barChart', 'sayG4'],
     monsters: [
       { type: 'butterfly', pal: 'ink', acc: 'inkDrop', name: '墨蝶', hp: 110, skill: 'silence' },
       { type: 'stone', pal: 'inkstone', acc: 'brush', name: '精英·砚台石灵', hp: 144, skill: 'heavy', elite: true },
@@ -16349,7 +16657,7 @@ var ZONES = [
   {
     id: 'xinggui', name: '星轨天穹', grade: 5, icon: 'star',
     desc: '悬浮的星辰长河',
-    knowledge: ['decimalMul', 'decimalDiv', 'fracAdd', 'fracSub', 'equation', 'volume', 'polyArea', 'surface', 'factor', 'fracMeaning', 'mathWeigh', 'view3d', 'rotation', 'pairCoord', 'chance', 'lineChart'],
+    knowledge: ['decimalMul', 'decimalDiv', 'fracAdd', 'fracSub', 'equation', 'volume', 'polyArea', 'surface', 'factor', 'fracMeaning', 'mathWeigh', 'view3d', 'rotation', 'pairCoord', 'chance', 'lineChart', 'sayG5'],
     monsters: [
       { type: 'star', pal: 'glow', acc: 'spark', name: '流荧', hp: 140, skill: 'drain' },
       { type: 'butterfly', pal: 'starry', acc: 'stardust', name: '精英·星屑蝶', hp: 178, skill: 'speedup', elite: true },
@@ -16374,7 +16682,7 @@ var ZONES = [
   {
     id: 'cangqiong', name: '苍穹雪原', grade: 6, icon: 'snow',
     desc: '极北终局，雪与光的尽头',
-    knowledge: ['fracMul', 'fracDiv', 'ratio', 'circle', 'percent', 'wordProblem', 'cylinder', 'negative', 'numberShape', 'pigeonhole', 'dirDist', 'pieChart'],
+    knowledge: ['fracMul', 'fracDiv', 'ratio', 'circle', 'percent', 'wordProblem', 'cylinder', 'negative', 'numberShape', 'pigeonhole', 'dirDist', 'pieChart', 'sayG6'],
     monsters: [
       { type: 'ice', pal: 'ice', acc: 'shard', name: '冰魄', hp: 170, skill: 'heavy' },
       { type: 'star', pal: 'frost', acc: 'snowflake', name: '精英·雪魄', hp: 213, skill: 'drain', elite: true },
@@ -19358,6 +19666,10 @@ function nextRound() {
        原来只在填空分支设置，竖式题后紧跟选择题时这两个区域会残留上一题的隐藏状态（test-c5a B14 抓到的）。 */
     document.getElementById('qSlots').classList.add('hidden');
     document.getElementById('qPad').classList.add('hidden');
+    /* 批 B53：选项超长就换单列（见 .q-opts.long）。每道题都重设，免得短选项题继承上一题的单列 */
+    var _maxOptLen = 0;
+    q.options.forEach(function (o) { _maxOptLen = Math.max(_maxOptLen, String(o).length); });
+    optsEl.classList.toggle('long', _maxOptLen > 8);
     q.options.forEach(function (o) {
       var b = document.createElement('button');
       b.className = 'q-opt';
@@ -27245,6 +27557,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.16.0", d: "10-29", one: "新增题型「定理与定律」：不给你数算，问哪一句说法是对的（每级 2 道）", notes: ["每个年级的数域里多了一个知识点「定理与定律」。题长得跟以前不一样：不给你数算，而是问「下面哪一句是对的」，四个选项都是这个年级学过的说法，只有一句没错。","还有一类是挖掉一个成分：长方形的面积 = 长 □ 宽，让你挑那个符号。这类一眼能答，用来先把概念稳住。","选项里的错句不是随便编的，各自对应一种典型混淆：把周长写成面积、把单位换算写成 10 倍、把正方形当成长方形。你选哪个，就露了哪一处没记牢。","这一版每个年级先放 2 道，把题型和排版跑通；后面补齐到每级 12 道。"] },
   { v: "v1.15.2", d: "10-29", one: "练习阁多了「听过的讲解」，讲过的能按年级翻出来重听", notes: ["练习阁底下多了一行「听过的讲解」，后面跟着数字，那是你已经听过几条。点开按年级翻，挑一条重听。","重听给的是完整四句，不是后来那两句提醒——你专门点开来听，就不该只给半段。","只列讲过的。没听过的不会出现在这里：这里不是第二个课堂，是复习的地方。","听完直接回练习阁，不用折回地图。"] },
   { v: "v1.15.1", d: "10-29", one: "引路人换了成人相；同一知识点讲过只讲两句；讲解可跳过", notes: ["讲知识点的那位「引路人」换了样子：束发、长袍垂地、留着短须，个子也高了些。原来他看着像个大孩子，开口却是长辈的语气，人对不上。","同一个知识点第一次讲四句，之后再错到它只讲两句——先用一句说清是什么，不再把同一段当噪音放第三遍。","讲解的演出右下角多了一个「跳过 ▸」。序章、结局、守律者的台词没有这个键，那些还是得听。"] },
   { v: "v1.15.0", d: "10-29", one: "讲解补齐到 74 个知识点（一到六年级全都有）", notes: ["上一版只有三年级 10 个知识点有讲解，其余遇到错题只挡一下、不开口。现在 74 个全都补齐——不管你在哪个年级的域里错了题，回图前都有一段。","每一段都是四句：一句开头 + 三句正题。不讲你错的那一道，只讲那道题背后的那个知识点。","难度题（找规律、找次品、鸽巢、优化问题这类）讲的是「怎么入手」，不是「公式是什么」——这类题本来就没有一个公式能概括。","还是那句话：有没有旧影都听得到。没有的话，由书院的引路人讲同一段。"] },
@@ -27324,14 +27637,14 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.15.2',
+  ver: 'v1.16.0',
   date: '2026-10-29',
-  one: '练习阁里多了「听过的讲解」：讲过的那些，随时能再听一遍。',
+  one: '多了一种题型：「定理与定律」——考的不是算得快，是课本上那句话怎么说的。',
   items: [
-    '练习阁底下多了一行「听过的讲解」，后面跟着数字 —— 那是你已经听过几条。点开能按年级翻，挑一条重听。',
-    '重听给的是完整四句，不是后来那两句提醒：你专门点开来听，就不该只给半段。',
-    '只列讲过的。没听过的不会出现在这里 —— 这里不是第二个课堂，是复习的地方。',
-    '听完直接回练习阁，不用折回地图。'
+    '每个年级的数域里多了一个知识点「定理与定律」。题长得跟以前不一样：不给你数算，而是问「下面哪一句是对的」，四个选项都是这个年级学过的说法，只有一句没错。',
+    '还有一类是挖掉一个成分：长方形的面积 = 长 □ 宽，让你挑那个符号。这类一眼能答，用来先把概念稳住。',
+    '选项里的错句不是随便编的，各自对应一种典型混淆：把周长写成面积、把单位换算写成 10 倍、把正方形当成长方形。你选哪个，就露了哪一处没记牢。',
+    '这一版每个年级先放了 2 道，把题型和排版跑通；后面会补齐到每级 12 道。'
   ]
 };
 
