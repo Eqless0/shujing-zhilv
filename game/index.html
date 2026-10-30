@@ -862,20 +862,54 @@
   /* ---- 我方血条块（在左栏顶部）---- */
   .hp-hero-block { flex: 0 0 auto; width: 236px; }
   .hp-hero-block .who { font-size: 0.8125rem; font-weight: bold; color: #f0e6d0; margin-bottom: 6px; }
-  /* 批 B61：名字行右端一盏小陶灯 —— 有旧影就亮着，表示「它一直在」
-     ⛔ 只用 CSS、不放 canvas：667 屏上主角只有 90px 宽，跟随物会挡人（这条是实测过的）。
-     也不要把它塞进 #heroName（20430 行每次进战斗重写 innerHTML，会把它抹掉）。 */
-  .who-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .who-row .who { margin-bottom: 0; }
-  .wick { position: relative; width: 6px; height: 13px; margin-left: auto; flex: 0 0 auto;
-    background: #d8c9a2; box-shadow: inset -2px 0 0 #b6a67f; }
-  .wick::before { content: ""; position: absolute; left: 50%; top: -7px; width: 5px; height: 8px;
-    margin-left: -2.5px; background: #ffd76a; border-radius: 50% 50% 45% 45%;
-    box-shadow: 0 0 8px 3px rgba(255,215,106,.45); animation: wickFlick 1.6s ease-in-out infinite; }
-  .wick.flare::before { box-shadow: 0 0 18px 9px rgba(255,215,106,.85); }
-  .wick.hidden { display: none; }
-  @keyframes wickFlick { 0%, 100% { opacity: .82; transform: scaleY(1); } 50% { opacity: 1; transform: scaleY(1.14); } }
-  @media (max-height: 460px) { .wick { height: 11px; } .wick::before { top: -6px; height: 7px; } }
+  /* 批 B62：跟着主角走的一小团火 —— 不是钉在名字行的一盏灯，是「一直跟着你」的活物。
+     做法：挂在 #heroUnit 里（主角的画布容器，position:relative）。这样主角受击发抖，它跟着抖，
+     不用写任何跟随循环；再让横向 7.3s、纵向 4.9s 两条不同周期的缓动叠起来，
+     走出一条缓慢的椭圆轨迹，看着就是「在身边游」。
+     ⛔ 别改成整屏乱跑的跟随物：667 屏上主角和怪物之间只剩几十像素，跑起来必然糊到别人脸上。
+     ⛔ 也别塞进 #heroName（20531 行每次进战斗重写 innerHTML，会把它抹掉）—— 放 heroUnit 才安全。
+     尺寸 12×15，落在主角头顶右侧的空中：不压人物、不压血条、不占技能格。 */
+  /* 位置基准：主角的像素范围是 canvas 内的 x 25~64 / y 55~112（实测 getImageData），
+     所以火苗落在它头顶右上方一点（left 66 / top 24），像跟在身边，不压身体。 */
+  .spirit-wick { position: absolute; left: 72px; top: 42px; width: 14px; height: 14px;
+    pointer-events: none; z-index: 6; animation: wickRoamX 6.5s ease-in-out infinite alternate; }
+  .spirit-wick .wk-body { position: relative; display: block; width: 14px; height: 14px;
+    animation: wickRoamY 4.1s ease-in-out infinite alternate; }
+  /* 光晕在外、焰心在内：只有一团橙色渐变会像个豆子（第一版就是），得分出「亮心」和「绯边」 */
+  .spirit-wick .wk-halo { position: absolute; left: -9px; top: -7px; width: 30px; height: 30px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,206,110,.42) 0%, rgba(255,170,70,.17) 42%, rgba(255,150,60,0) 70%);
+    animation: wickFlick 1.5s ease-in-out infinite; }
+  /* 用 clip-path 切出火焰轮廓（上尖、腰鼓、底收），圆角矩形怎么调都是一个豆子 */
+  .spirit-wick .wk-flame { position: absolute; left: 0; top: 0; width: 14px; height: 14px;
+    background: linear-gradient(180deg, #fff8d8 0%, #ffd24a 40%, #ff9a2e 78%, #ff7a1e 100%);
+    clip-path: polygon(50% 0%, 61% 13%, 79% 29%, 88% 55%, 78% 78%, 62% 95%, 50% 100%, 38% 95%, 22% 78%, 12% 55%, 21% 29%, 39% 13%);
+    animation: wickFlick 1.5s ease-in-out infinite; }
+  .spirit-wick .wk-flame i { position: absolute; left: 4.5px; bottom: 2px; width: 5px; height: 8px;
+    background: #fffef6; opacity: .92;
+    clip-path: polygon(50% 0%, 70% 26%, 78% 58%, 62% 88%, 50% 100%, 36% 86%, 24% 58%, 32% 26%); }
+  .spirit-wick .wk-spark { position: absolute; left: 5px; top: -3px; width: 2px; height: 2px;
+    background: #fff3c8; border-radius: 50%; opacity: 0; animation: wickSpark 4.2s ease-out infinite; }
+  .spirit-wick.flare .wk-flame { box-shadow: 0 0 16px 6px rgba(255,200,90,.7); transform: scale(1.28); }
+  /* ⛔ flare 别给 halo 加 box-shadow：它是方块，一放大就露出一个直角黄框（实测过） */
+  .spirit-wick.flare .wk-halo { transform: scale(1.6);
+    background: radial-gradient(circle, rgba(255,222,150,.62) 0%, rgba(255,180,80,.26) 44%, rgba(255,150,60,0) 72%); }
+  .spirit-wick.hidden { display: none; }
+  @keyframes wickRoamX { from { transform: translateX(-7px); } to { transform: translateX(9px); } }
+  /* 飘的时候带一点倾角：直上直下像挂着，歪着才像被带着走 */
+  @keyframes wickRoamY { from { transform: translateY(-8px) rotate(-11deg); } to { transform: translateY(8px) rotate(3deg); } }
+  @keyframes wickFlick {
+    0%, 100% { opacity: .86; transform: scaleY(1) scaleX(1); }
+    45% { opacity: 1; transform: scaleY(1.16) scaleX(.94); }
+  }
+  @keyframes wickSpark {
+    0%, 72% { opacity: 0; transform: translateY(0) scale(1); }
+    80% { opacity: .9; }
+    100% { opacity: 0; transform: translateY(-9px) scale(.4); }
+  }
+  @media (max-height: 460px) { .spirit-wick { left: 72px; top: 40px; width: 10px; height: 13px; }
+    .spirit-wick .wk-body { width: 10px; height: 13px; }
+    .spirit-wick .wk-flame { width: 10px; height: 13px; }
+    .spirit-wick .wk-flame i { left: 3px; width: 4px; height: 7px; } }
   .hp-hero-block .who .lv { color: #ffe08a; font-size: 0.6875rem; }
   .hp-hero-block .hp-track { width: 100%; }
   .hp-hero-block .num {
@@ -1481,6 +1515,8 @@
     .bt-unit .ring-pulse, .shake { animation-duration: .01s; }
     /* 批 D2-a2：待机帧是无限循环，压时长会变成高频闪烁，直接停掉 */
     #enemyCanvas, .bt-unit.enemy.boss #enemyCanvas { animation: none; }
+    /* 批 B62：跟随火是无限循环，同样整体停掉（压时长会变高频闪烁） */
+    .spirit-wick, .spirit-wick .wk-body, .spirit-wick .wk-flame, .spirit-wick .wk-spark { animation: none; }
     .screen.on.enter { animation-duration: .01s; }   /* 批 D1/D3.1：转场也一并压掉 */
   }
 
@@ -3474,10 +3510,7 @@
         <!-- 批 E4（方案 A）：血条 + 技能栏 + 行囊 归到左下角一竖列，右侧战场空出来 -->
         <div class="hero-left" id="heroLeft">
           <div class="hp-hero-block">
-            <div class="who-row">
-              <div class="who" id="heroName">小竹 <span class="lv" id="heroLv"></span></div>
-              <i class="wick hidden" id="spiritWick" title="跟着你的旧影"></i>
-            </div>
+            <div class="who" id="heroName">小竹 <span class="lv" id="heroLv"></span></div>
             <div class="hp-track"><div class="hp-lag" id="heroHpLag"></div><div class="hp-fill hero" id="heroHp" style="width:100%"></div></div>
             <div class="num" id="heroHpNum">100 / 100</div>
           </div>
@@ -3493,6 +3526,11 @@
 
         <div class="bt-unit hero" id="heroUnit">
           <canvas id="heroCanvas" width="90" height="120" style="image-rendering:pixelated;display:block"></canvas>
+          <!-- 批 B62：跟着主角的一小团火（收过旧影才亮）。放 heroUnit 里 → 跟着受击发抖，
+               而且不会被 20531 行那句 innerHTML 抹掉。 -->
+          <i class="spirit-wick hidden" id="spiritWick" title="跟着你的旧影">
+            <span class="wk-body"><span class="wk-halo"></span><span class="wk-flame"><i></i></span><span class="wk-spark"></span></span>
+          </i>
           <div class="bt-shadow"></div>
         </div>
       </div>
@@ -20341,7 +20379,7 @@ function startBattle(zone, kind, monIdx) {
                         // 否则它会继续扣新战斗的时间，并在 B.q 为空时引爆 answerChoice
   hideVerdict();
   closeItemPop();
-  syncWick();          /* 批 B61：这一场有没有小灯，进战斗就定 */
+  syncWick();          /* 批 B62：这一场有没有那团跟随火，进战斗就定 */
   var isBoss = kind === 'boss';
   // Boss 战前先播守律者剧情（每区域一次）
   if (isBoss && zone.bossStory && !zone._bossStoryPlayed) {
@@ -27147,7 +27185,7 @@ function handoverStory(from, to) {
   }, { skip: true });
 }
 
-/* 批 B61：名字行那盏小灯 —— 有旧影就亮着（表示它一直在），没有就藏起来 */
+/* 批 B62：跟着主角的那团火 —— 收过旧影就亮着（表示它一直在），没有就藏起来 */
 function syncWick() {
   var el = document.getElementById("spiritWick");
   if (!el) return;
@@ -27185,7 +27223,7 @@ function spiritHelp() {
   B.spiritGuard = 1;                                  /* 下一次受击减半 */
   try { Audio2.chord(); } catch (e) {}
   spiritNote(sp.alias, sp.grade, sp.phrase, sp.mine);
-  try {                                  /* 批 B61：出手时名字行那盏灯亮一下，交代「光是从它那儿来的」 */
+  try {                                  /* 批 B62：出手时身边那团火亮一下，交代「光是从它那儿来的」 */
     var _wk = document.getElementById("spiritWick");
     if (_wk) {
       _wk.classList.remove("hidden");
@@ -28862,7 +28900,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
-  { v: "v1.19.0", d: "10-30", one: "旧影有了人形（剪影）；名字行多了盏不灭的小灯", notes: ["旧影台那四句收人的话，现在有人站在对面：一个披着长袍的剪影，下摆淡进地里，只有一圈暖光勾出轮廓。它没有脸——它是影子，不是人。","答错之后那段讲解也一样：说话的那位现在会站在台上，不再只有声音。","战斗界面名字行右端多了一盏小陶灯，火苗一直忽明忽暗。收过旧影才亮；它出手那一下，灯会先亮一下。","旧影的名字改成只用那 18 位（每年级 3 位），不再读你别的存档里的名字。同一学年收满 3 位就收不到了，再进去会说「这儿的灯都点过了」。"] },
+  { v: "v1.19.0", d: "10-30", one: "旧影有了人形（剪影）；战斗里多了一小团跟着你飘的火", notes: ["旧影台那四句收人的话，现在有人站在对面：一个披着长袍的剪影，下摆淡进地里，只有一圈暖光勾出轮廓。它没有脸——它是影子，不是人。","答错之后那段讲解也一样：说话的那位现在会站在台上，不再只有声音。","战斗里有一小团火跟着你飘：贴在你肩头右侧，慢慢游、忽明忽暗，你挨打时它跟着抖。收过旧影才出现；它出手那一下，火会先亮一下。","旧影的名字改成只用那 18 位（每年级 3 位），不再读你别的存档里的名字。同一学年收满 3 位就收不到了，再进去会说「这儿的灯都点过了」。"] },
   { v: "v1.18.0", d: "10-29", one: "旧影真的会跟着你了；讲解改成「这个点没学会」才讲", notes: ["你在旧影台收下的那一位，从今往后替你出手、替你挡那一下的就是他。以前来帮忙的是路过的影子，抽到谁是谁；现在出场的就是你认识的那个人，回来的第一句话是他的口气。","你换到别的年级去，他还是会来 —— 但那时候他说的是「又见面了，我还认得你」。他不会再拿自己那年级的话糊弄你。","还没收过旧影的，裂隙残血时照样会有路过的影子扶一把 —— 那份惊喜留着。","讲解变得少而准：以前一场里错一次就讲，现在只有「这个知识点你累计错了三次以上、错比对多」，或者「这一场同一个点错了两次」，他才会开口。讲过的点不再自动重播，结算页会留一行小字告诉你去哪儿重听。","重听一律给完整四句 —— 以前「听过就只讲两句」，现在不必了，因为他不会自己再讲第二遍。","旧影台可以换人了：收过旧影之后再点那一格，进去是一排烛台——亮着的那盏是跟着你的这位，点另一盏就能请他。换之前会先问你一句，换了有个两屏的交接：走的那位说「我在这儿等过你」，来的那位说自己那句。"] },
   { v: "v1.17.1", d: "10-29", one: "家长面板里六个年级的说法题都标了课本位置", notes: ["人物 → 家长 → 知识点掌握，每个知识点下面那行小字写着「在课本哪一册哪一单元」。说法题那六条以前是空的，现在补上了。","说法题本来就不是某一单元的题——它把整册的定义、公式、换算拿出来问，所以位置写成「每册主要几单元 等」，不是精确到某一页。","这一版补的是人教课本的位置。用北师、苏教、冀教的话，这一栏仍会显示人教的说法；但「几年级出这道题」是按你那版单独核过的，不影响会不会抽到没学过的东西。"] },
   { v: "v1.17.0", d: "10-29", one: "说法题六个年级全满：每级 12 道，共 72 道", notes: ["二到六年级也补满了。一年级那批是试点，现在六个年级一共 72 道——不管你在哪个年级的数域里，都会遇到。","每级都是 8 道挑符号、4 道从四句里挑对的那句。挑符号的一眼能答，用来稳概念；四句的那类才考真本事。","错的那三句不是随便编的：一句错在方向反了、一句错在把两个概念互换、一句错在方法。你选哪个，就知道哪一处没记牢。","每道题都只考该年级课本上写过的东西。教材位置还没核完，等核完再补一句「在哪一册」。"] },
@@ -28949,10 +28987,10 @@ var UPDATE_LOG = [
 var UPDATE_NOTE = {
   ver: 'v1.19.0',
   date: '2026-10-30',
-  one: '旧影有了人形，名字行还多了一盏不灭的小灯。',
+  one: '旧影有了人形，战斗里还有一小团火跟着你飘。',
   items: [
     '旧影台收人的那四句，现在有人站在对面了：一个披长袍的剪影，下摆淡进地里，只有一圈暖光勾轮廓。它没有脸——它是影子。答错后的讲解也一样，说话的那位会站上台。',
-    '战斗界面名字行右端多了一盏小陶灯，火苗一直忽明忽暗。收过旧影才亮；它出手那一下，灯会先亮一下，让你知道光是从它那儿来的。',
+    '战斗里有一小团火跟着你飘：贴在你肩头右侧，慢慢游、忽明忽暗，你挨打时它跟着抖。收过旧影才出现；它出手那一下，火会先亮一下，让你知道光是从它那儿来的。',
     '名字改成只用那 18 位旧影（每年级 3 位），不再读你别的存档里的名字。同一学年收满 3 位就收不到了，再进去会说「这儿的灯都点过了」。'
   ]
 };
