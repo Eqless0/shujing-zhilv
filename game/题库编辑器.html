@@ -1611,7 +1611,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_swap",
         "n": "交换加数的位置",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "两个数相加，交换它们的位置，得数 □。",
         "ans": "'不变'",
@@ -1626,11 +1625,9 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_even",
         "n": "谁说得对（单双数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于单双数，哪一句说法是对的？",
         "ans": "'个位是 0、2、4、6、8 的是双数'",
-        "minD": 1,
         "type": "choice",
         "options": [
           "个位是 0、2、4、6、8 的是双数",
@@ -1643,11 +1640,9 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_class",
         "n": "谁说得对（分类）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于分类，哪一句说法是对的？",
         "ans": "'每样东西只能放进一个圈里'",
-        "minD": 1,
         "type": "choice",
         "options": [
           "每样东西只能放进一个圈里",
@@ -1660,7 +1655,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_ball",
         "n": "谁说得对（球和圆柱）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于立体图形，哪一句是对的？",
         "ans": "'球不管怎么放都能滚'",
@@ -1670,6 +1664,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "圆柱不管怎么放都能滚",
           "长方体的面都是正方形",
           "球有 6 个面"
+        ]
+      },
+      {
+        "id": "t3_add",
+        "n": "加法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把两个数合起来，求一共是多少，用 □。",
+        "ans": "'加法'",
+        "type": "choice",
+        "options": [
+          "加法",
+          "减法",
+          "乘法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_sub",
+        "n": "减法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "从一个数里去掉一部分，求剩下多少，用 □。",
+        "ans": "'减法'",
+        "type": "choice",
+        "options": [
+          "减法",
+          "加法",
+          "乘法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_ball",
+        "n": "球的特征",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "放在桌上会到处滚、身上没有平面的物体，形状是 □。",
+        "ans": "'球'",
+        "type": "choice",
+        "options": [
+          "球",
+          "圆柱",
+          "正方体",
+          "长方体"
         ]
       }
     ]
@@ -2643,7 +2682,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_pos3",
         "n": "第几位是百位",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "从右边起，第三位是 □ 位。",
         "ans": "'百'",
@@ -2658,9 +2696,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_clock",
         "n": "谁说得对（钟面）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于钟面，哪一句说法是对的？",
         "ans": "'分针走一小格是 1 分'",
         "type": "choice",
@@ -2675,7 +2711,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_look",
         "n": "谁说得对（观察物体）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于观察物体，哪一句是对的？",
         "ans": "'站在不同位置，看到的形状可能不同'",
@@ -2691,9 +2726,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_angle",
         "n": "谁说得对（角的大小）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于角的大小，哪一句说法是对的？",
         "ans": "'角的大小只看两边张开的程度'",
         "type": "choice",
@@ -2702,6 +2735,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "边画得越长，角就越大",
           "角有一个顶点和三条边",
           "所有的角都比直角小"
+        ]
+      },
+      {
+        "id": "t3_mul",
+        "n": "乘法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "求几个相同加数的和，用 □ 比较简便。",
+        "ans": "'乘法'",
+        "type": "choice",
+        "options": [
+          "乘法",
+          "加法",
+          "减法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_div",
+        "n": "除法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把一些东西平均分成几份，求每份是多少，用 □。",
+        "ans": "'除法'",
+        "type": "choice",
+        "options": [
+          "除法",
+          "乘法",
+          "加法",
+          "减法"
+        ]
+      },
+      {
+        "id": "t3_vertex",
+        "n": "角有几个顶点",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个角有 □ 个顶点。",
+        "ans": "'1'",
+        "type": "choice",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "0"
         ]
       }
     ]
@@ -3778,7 +3856,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_zero",
         "n": "0 乘任何数",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "0 和任何数相乘，都得 □。",
         "ans": "'0'",
@@ -3793,7 +3870,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_dir",
         "n": "谁说得对（方向）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于地图上的方向，哪一句是对的？",
         "ans": "'一般是上北下南、左西右东'",
@@ -3809,9 +3885,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_table",
         "n": "谁说得对（复式统计表）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于复式统计表，哪一句是对的？",
         "ans": "'它能把两张单式统计表合成一张'",
         "type": "choice",
@@ -3826,9 +3900,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_unit",
         "n": "谁说得对（单位换算）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于单位换算，哪一句说法是对的？",
         "ans": "'大单位换成小单位，数会变大'",
         "type": "choice",
@@ -3837,6 +3909,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "大单位换成小单位，数会变小",
           "相邻两个长度单位都是 100 倍",
           "换算只改单位，数不用变"
+        ]
+      },
+      {
+        "id": "t3_peri",
+        "n": "周长的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "围图形一周的长度，叫它的 □。",
+        "ans": "'周长'",
+        "type": "choice",
+        "options": [
+          "周长",
+          "面积",
+          "边长",
+          "体积"
+        ]
+      },
+      {
+        "id": "t3_area",
+        "n": "面积的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "物体表面或封闭图形的大小，叫它们的 □。",
+        "ans": "'面积'",
+        "type": "choice",
+        "options": [
+          "面积",
+          "周长",
+          "体积",
+          "长度"
+        ]
+      },
+      {
+        "id": "t3_frac",
+        "n": "几分之一",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把一个月饼平均分成 4 份，其中 1 份是这个月饼的 □。",
+        "ans": "'四分之一'",
+        "type": "choice",
+        "options": [
+          "四分之一",
+          "四分之四",
+          "一分之四",
+          "四分之二"
         ]
       }
     ]
@@ -5494,7 +5611,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_decp",
         "n": "小数加减先对齐什么",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "小数加减法，先把 □ 对齐。",
         "ans": "'小数点'",
@@ -5509,7 +5625,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_tri",
         "n": "谁说得对（三角形）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于三角形，哪一句说法是对的？",
         "ans": "'任意两边之和大于第三边'",
@@ -5525,9 +5640,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_opt",
         "n": "谁说得对（优化）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于合理安排时间，哪一句是对的？",
         "ans": "'能同时做的事，尽量同时做'",
         "type": "choice",
@@ -5542,9 +5655,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_sym",
         "n": "谁说得对（轴对称）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于轴对称，哪一句说法是对的？",
         "ans": "'沿对称轴对折，两边能完全重合'",
         "type": "choice",
@@ -5553,6 +5664,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "平移会改变图形的形状",
           "长方形有 4 条对称轴",
           "旋转和平移是一回事"
+        ]
+      },
+      {
+        "id": "t3_perp",
+        "n": "垂直的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "两条直线相交成直角，就说这两条直线互相 □。",
+        "ans": "'垂直'",
+        "type": "choice",
+        "options": [
+          "垂直",
+          "平行",
+          "重合",
+          "对称"
+        ]
+      },
+      {
+        "id": "t3_para",
+        "n": "平行线的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "在同一个平面内不相交的两条直线，叫 □。",
+        "ans": "'平行线'",
+        "type": "choice",
+        "options": [
+          "平行线",
+          "垂线",
+          "射线",
+          "线段"
+        ]
+      },
+      {
+        "id": "t3_tri",
+        "n": "三角形三边关系",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "三角形任意两边之和 □ 第三边。",
+        "ans": "'大于'",
+        "type": "choice",
+        "options": [
+          "大于",
+          "小于",
+          "等于",
+          "不确定"
         ]
       }
     ]
@@ -6773,7 +6929,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_chance",
         "n": "一定可能不可能",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "盒子里全是红球，摸出白球是 □ 的。",
         "ans": "'不可能'",
@@ -6788,9 +6943,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_view",
         "n": "谁说得对（三视图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于三视图，哪一句说法是对的？",
         "ans": "'从三个方向看，形状可能都不同'",
         "type": "choice",
@@ -6805,7 +6958,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_rot",
         "n": "谁说得对（旋转）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于旋转，哪一句说法是对的？",
         "ans": "'旋转只改变位置和方向，形状不变'",
@@ -6821,9 +6973,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_line",
         "n": "谁说得对（折线图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于折线统计图，哪一句是对的？",
         "ans": "'折线统计图看的是变化趋势'",
         "type": "choice",
@@ -6832,6 +6982,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "折线图适合比多少，不适合看变化",
           "线越平，说明数量变化越大",
           "图上的点可以直接相加当总数"
+        ]
+      },
+      {
+        "id": "t3_prime",
+        "n": "质数的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "只有 1 和它本身两个因数的数，叫 □。",
+        "ans": "'质数'",
+        "type": "choice",
+        "options": [
+          "质数",
+          "合数",
+          "奇数",
+          "偶数"
+        ]
+      },
+      {
+        "id": "t3_maxfac",
+        "n": "最大的因数",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个数最大的因数是 □。",
+        "ans": "'它本身'",
+        "type": "choice",
+        "options": [
+          "它本身",
+          "1",
+          "0",
+          "它的 2 倍"
+        ]
+      },
+      {
+        "id": "t3_surf",
+        "n": "表面积的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方体 6 个面的总面积，叫它的 □。",
+        "ans": "'表面积'",
+        "type": "choice",
+        "options": [
+          "表面积",
+          "体积",
+          "容积",
+          "底面积"
         ]
       }
     ]
@@ -7764,7 +7959,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t1_pigeon",
         "n": "鸽巢原理算至少",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "4 个苹果放进 3 个抽屉，总有一个至少放 □ 个。",
         "ans": "'2'",
@@ -7779,9 +7973,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_pct",
         "n": "谁说得对（百分数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于百分数，哪一句说法是对的？",
         "ans": "'它表示两个数的倍比关系，不带单位'",
         "type": "choice",
@@ -7796,9 +7988,7 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_pie",
         "n": "谁说得对（扇形图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于扇形统计图，哪一句是对的？",
         "ans": "'所有扇形加起来一定是 100%'",
         "type": "choice",
@@ -7813,7 +8003,6 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
         "id": "t2_neg",
         "n": "谁说得对（负数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于负数，哪一句说法是对的？",
         "ans": "'数轴上右边的数总比左边的大'",
@@ -7823,6 +8012,51 @@ window.__EDITOR_BANK = /*__EDITOR_BANK_START__*/{
           "数轴上左边的数总比右边的大",
           "−3 比 −8 小",
           "0 是最小的负数"
+        ]
+      },
+      {
+        "id": "t3_pi",
+        "n": "圆周率的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆的周长和它的直径的比值，叫 □。",
+        "ans": "'圆周率'",
+        "type": "choice",
+        "options": [
+          "圆周率",
+          "半径",
+          "直径",
+          "圆心角"
+        ]
+      },
+      {
+        "id": "t3_ratio",
+        "n": "比例的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "表示两个比相等的式子，叫 □。",
+        "ans": "'比例'",
+        "type": "choice",
+        "options": [
+          "比例",
+          "比值",
+          "比",
+          "分数"
+        ]
+      },
+      {
+        "id": "t3_cylside",
+        "n": "圆柱侧面展开图",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆柱的侧面展开后，是一个 □。",
+        "ans": "'长方形'",
+        "type": "choice",
+        "options": [
+          "长方形",
+          "三角形",
+          "圆形",
+          "梯形"
         ]
       }
     ]

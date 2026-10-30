@@ -3279,7 +3279,7 @@
         <button class="mcbtn gold" id="btnTitleHow">玩法说明</button>
       </div>
       <button class="title-link" id="btnTitleIntro">重温序章</button>
-      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.19.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
+      <div class="title-foot" id="titleFoot"><span class="foot-ver" id="footVer" title="点这里看最近改了什么">v1.20.0</span> · 存档保存在本机浏览器 · © 2026 猴小忆 保留所有权利</div>
     </div>
   </div>
   <!-- 批 布局文案档#14：玩法说明浮层（移到 #app 顶层，标题屏与游戏内设置面板都能唤起；B 版金按钮 + 口语故事文案，v0.92） -->
@@ -4287,7 +4287,7 @@
 
 <script>
 /* =======================================================================
-   数境之旅 · 原型 v1.19.0
+   数境之旅 · 原型 v1.20.0
    像素方块风（融合 Minecraft 元素）· 自动出题 · 捏人 · 限时增伤被动
    ======================================================================= */
 
@@ -8082,7 +8082,6 @@ var __DECL = {
         "id": "t1_swap",
         "n": "交换加数的位置",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "两个数相加，交换它们的位置，得数 □。",
         "ans": "'不变'",
@@ -8097,11 +8096,9 @@ var __DECL = {
         "id": "t2_even",
         "n": "谁说得对（单双数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于单双数，哪一句说法是对的？",
         "ans": "'个位是 0、2、4、6、8 的是双数'",
-        "minD": 1,
         "type": "choice",
         "options": [
           "个位是 0、2、4、6、8 的是双数",
@@ -8114,11 +8111,9 @@ var __DECL = {
         "id": "t2_class",
         "n": "谁说得对（分类）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于分类，哪一句说法是对的？",
         "ans": "'每样东西只能放进一个圈里'",
-        "minD": 1,
         "type": "choice",
         "options": [
           "每样东西只能放进一个圈里",
@@ -8131,7 +8126,6 @@ var __DECL = {
         "id": "t2_ball",
         "n": "谁说得对（球和圆柱）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于立体图形，哪一句是对的？",
         "ans": "'球不管怎么放都能滚'",
@@ -8141,6 +8135,51 @@ var __DECL = {
           "圆柱不管怎么放都能滚",
           "长方体的面都是正方形",
           "球有 6 个面"
+        ]
+      },
+      {
+        "id": "t3_add",
+        "n": "加法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把两个数合起来，求一共是多少，用 □。",
+        "ans": "'加法'",
+        "type": "choice",
+        "options": [
+          "加法",
+          "减法",
+          "乘法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_sub",
+        "n": "减法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "从一个数里去掉一部分，求剩下多少，用 □。",
+        "ans": "'减法'",
+        "type": "choice",
+        "options": [
+          "减法",
+          "加法",
+          "乘法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_ball",
+        "n": "球的特征",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "放在桌上会到处滚、身上没有平面的物体，形状是 □。",
+        "ans": "'球'",
+        "type": "choice",
+        "options": [
+          "球",
+          "圆柱",
+          "正方体",
+          "长方体"
         ]
       }
     ]
@@ -9114,7 +9153,6 @@ var __DECL = {
         "id": "t1_pos3",
         "n": "第几位是百位",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "从右边起，第三位是 □ 位。",
         "ans": "'百'",
@@ -9129,9 +9167,7 @@ var __DECL = {
         "id": "t2_clock",
         "n": "谁说得对（钟面）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于钟面，哪一句说法是对的？",
         "ans": "'分针走一小格是 1 分'",
         "type": "choice",
@@ -9146,7 +9182,6 @@ var __DECL = {
         "id": "t2_look",
         "n": "谁说得对（观察物体）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于观察物体，哪一句是对的？",
         "ans": "'站在不同位置，看到的形状可能不同'",
@@ -9162,9 +9197,7 @@ var __DECL = {
         "id": "t2_angle",
         "n": "谁说得对（角的大小）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于角的大小，哪一句说法是对的？",
         "ans": "'角的大小只看两边张开的程度'",
         "type": "choice",
@@ -9173,6 +9206,51 @@ var __DECL = {
           "边画得越长，角就越大",
           "角有一个顶点和三条边",
           "所有的角都比直角小"
+        ]
+      },
+      {
+        "id": "t3_mul",
+        "n": "乘法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "求几个相同加数的和，用 □ 比较简便。",
+        "ans": "'乘法'",
+        "type": "choice",
+        "options": [
+          "乘法",
+          "加法",
+          "减法",
+          "除法"
+        ]
+      },
+      {
+        "id": "t3_div",
+        "n": "除法的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把一些东西平均分成几份，求每份是多少，用 □。",
+        "ans": "'除法'",
+        "type": "choice",
+        "options": [
+          "除法",
+          "乘法",
+          "加法",
+          "减法"
+        ]
+      },
+      {
+        "id": "t3_vertex",
+        "n": "角有几个顶点",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个角有 □ 个顶点。",
+        "ans": "'1'",
+        "type": "choice",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "0"
         ]
       }
     ]
@@ -10249,7 +10327,6 @@ var __DECL = {
         "id": "t1_zero",
         "n": "0 乘任何数",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "0 和任何数相乘，都得 □。",
         "ans": "'0'",
@@ -10264,7 +10341,6 @@ var __DECL = {
         "id": "t2_dir",
         "n": "谁说得对（方向）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于地图上的方向，哪一句是对的？",
         "ans": "'一般是上北下南、左西右东'",
@@ -10280,9 +10356,7 @@ var __DECL = {
         "id": "t2_table",
         "n": "谁说得对（复式统计表）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于复式统计表，哪一句是对的？",
         "ans": "'它能把两张单式统计表合成一张'",
         "type": "choice",
@@ -10297,9 +10371,7 @@ var __DECL = {
         "id": "t2_unit",
         "n": "谁说得对（单位换算）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于单位换算，哪一句说法是对的？",
         "ans": "'大单位换成小单位，数会变大'",
         "type": "choice",
@@ -10308,6 +10380,51 @@ var __DECL = {
           "大单位换成小单位，数会变小",
           "相邻两个长度单位都是 100 倍",
           "换算只改单位，数不用变"
+        ]
+      },
+      {
+        "id": "t3_peri",
+        "n": "周长的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "围图形一周的长度，叫它的 □。",
+        "ans": "'周长'",
+        "type": "choice",
+        "options": [
+          "周长",
+          "面积",
+          "边长",
+          "体积"
+        ]
+      },
+      {
+        "id": "t3_area",
+        "n": "面积的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "物体表面或封闭图形的大小，叫它们的 □。",
+        "ans": "'面积'",
+        "type": "choice",
+        "options": [
+          "面积",
+          "周长",
+          "体积",
+          "长度"
+        ]
+      },
+      {
+        "id": "t3_frac",
+        "n": "几分之一",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "把一个月饼平均分成 4 份，其中 1 份是这个月饼的 □。",
+        "ans": "'四分之一'",
+        "type": "choice",
+        "options": [
+          "四分之一",
+          "四分之四",
+          "一分之四",
+          "四分之二"
         ]
       }
     ]
@@ -11965,7 +12082,6 @@ var __DECL = {
         "id": "t1_decp",
         "n": "小数加减先对齐什么",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "小数加减法，先把 □ 对齐。",
         "ans": "'小数点'",
@@ -11980,7 +12096,6 @@ var __DECL = {
         "id": "t2_tri",
         "n": "谁说得对（三角形）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于三角形，哪一句说法是对的？",
         "ans": "'任意两边之和大于第三边'",
@@ -11996,9 +12111,7 @@ var __DECL = {
         "id": "t2_opt",
         "n": "谁说得对（优化）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于合理安排时间，哪一句是对的？",
         "ans": "'能同时做的事，尽量同时做'",
         "type": "choice",
@@ -12013,9 +12126,7 @@ var __DECL = {
         "id": "t2_sym",
         "n": "谁说得对（轴对称）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于轴对称，哪一句说法是对的？",
         "ans": "'沿对称轴对折，两边能完全重合'",
         "type": "choice",
@@ -12024,6 +12135,51 @@ var __DECL = {
           "平移会改变图形的形状",
           "长方形有 4 条对称轴",
           "旋转和平移是一回事"
+        ]
+      },
+      {
+        "id": "t3_perp",
+        "n": "垂直的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "两条直线相交成直角，就说这两条直线互相 □。",
+        "ans": "'垂直'",
+        "type": "choice",
+        "options": [
+          "垂直",
+          "平行",
+          "重合",
+          "对称"
+        ]
+      },
+      {
+        "id": "t3_para",
+        "n": "平行线的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "在同一个平面内不相交的两条直线，叫 □。",
+        "ans": "'平行线'",
+        "type": "choice",
+        "options": [
+          "平行线",
+          "垂线",
+          "射线",
+          "线段"
+        ]
+      },
+      {
+        "id": "t3_tri",
+        "n": "三角形三边关系",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "三角形任意两边之和 □ 第三边。",
+        "ans": "'大于'",
+        "type": "choice",
+        "options": [
+          "大于",
+          "小于",
+          "等于",
+          "不确定"
         ]
       }
     ]
@@ -13244,7 +13400,6 @@ var __DECL = {
         "id": "t1_chance",
         "n": "一定可能不可能",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "盒子里全是红球，摸出白球是 □ 的。",
         "ans": "'不可能'",
@@ -13259,9 +13414,7 @@ var __DECL = {
         "id": "t2_view",
         "n": "谁说得对（三视图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于三视图，哪一句说法是对的？",
         "ans": "'从三个方向看，形状可能都不同'",
         "type": "choice",
@@ -13276,7 +13429,6 @@ var __DECL = {
         "id": "t2_rot",
         "n": "谁说得对（旋转）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于旋转，哪一句说法是对的？",
         "ans": "'旋转只改变位置和方向，形状不变'",
@@ -13292,9 +13444,7 @@ var __DECL = {
         "id": "t2_line",
         "n": "谁说得对（折线图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于折线统计图，哪一句是对的？",
         "ans": "'折线统计图看的是变化趋势'",
         "type": "choice",
@@ -13303,6 +13453,51 @@ var __DECL = {
           "折线图适合比多少，不适合看变化",
           "线越平，说明数量变化越大",
           "图上的点可以直接相加当总数"
+        ]
+      },
+      {
+        "id": "t3_prime",
+        "n": "质数的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "只有 1 和它本身两个因数的数，叫 □。",
+        "ans": "'质数'",
+        "type": "choice",
+        "options": [
+          "质数",
+          "合数",
+          "奇数",
+          "偶数"
+        ]
+      },
+      {
+        "id": "t3_maxfac",
+        "n": "最大的因数",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "一个数最大的因数是 □。",
+        "ans": "'它本身'",
+        "type": "choice",
+        "options": [
+          "它本身",
+          "1",
+          "0",
+          "它的 2 倍"
+        ]
+      },
+      {
+        "id": "t3_surf",
+        "n": "表面积的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "长方体 6 个面的总面积，叫它的 □。",
+        "ans": "'表面积'",
+        "type": "choice",
+        "options": [
+          "表面积",
+          "体积",
+          "容积",
+          "底面积"
         ]
       }
     ]
@@ -14235,7 +14430,6 @@ var __DECL = {
         "id": "t1_pigeon",
         "n": "鸽巢原理算至少",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "4 个苹果放进 3 个抽屉，总有一个至少放 □ 个。",
         "ans": "'2'",
@@ -14250,9 +14444,7 @@ var __DECL = {
         "id": "t2_pct",
         "n": "谁说得对（百分数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于百分数，哪一句说法是对的？",
         "ans": "'它表示两个数的倍比关系，不带单位'",
         "type": "choice",
@@ -14267,9 +14459,7 @@ var __DECL = {
         "id": "t2_pie",
         "n": "谁说得对（扇形图）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
-        "minD": 1,
         "tpl": "关于扇形统计图，哪一句是对的？",
         "ans": "'所有扇形加起来一定是 100%'",
         "type": "choice",
@@ -14284,7 +14474,6 @@ var __DECL = {
         "id": "t2_neg",
         "n": "谁说得对（负数）",
         "kind": "arith",
-        "hard": true,
         "vars": {},
         "tpl": "关于负数，哪一句说法是对的？",
         "ans": "'数轴上右边的数总比左边的大'",
@@ -14294,6 +14483,51 @@ var __DECL = {
           "数轴上左边的数总比右边的大",
           "−3 比 −8 小",
           "0 是最小的负数"
+        ]
+      },
+      {
+        "id": "t3_pi",
+        "n": "圆周率的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆的周长和它的直径的比值，叫 □。",
+        "ans": "'圆周率'",
+        "type": "choice",
+        "options": [
+          "圆周率",
+          "半径",
+          "直径",
+          "圆心角"
+        ]
+      },
+      {
+        "id": "t3_ratio",
+        "n": "比例的意义",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "表示两个比相等的式子，叫 □。",
+        "ans": "'比例'",
+        "type": "choice",
+        "options": [
+          "比例",
+          "比值",
+          "比",
+          "分数"
+        ]
+      },
+      {
+        "id": "t3_cylside",
+        "n": "圆柱侧面展开图",
+        "kind": "arith",
+        "vars": {},
+        "tpl": "圆柱的侧面展开后，是一个 □。",
+        "ans": "'长方形'",
+        "type": "choice",
+        "options": [
+          "长方形",
+          "三角形",
+          "圆形",
+          "梯形"
         ]
       }
     ]
@@ -15498,10 +15732,13 @@ var KNOWLEDGE = {
       { id: "t1_face", n: "正方体有几个面", gen: function (d) { return __dg(__DECL["sayG1"].variants[5], d); } },
       { id: "t2_size", n: "谁说得对（比大小）", gen: function (d) { return __dg(__DECL["sayG1"].variants[6], d); } },
       { id: "t2_shape", n: "谁说得对（正方形）", gen: function (d) { return __dg(__DECL["sayG1"].variants[7], d); } },
-      { id: "t1_swap", n: "交换加数的位置", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[8], d); } },
-      { id: "t2_even", n: "谁说得对（单双数）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG1"].variants[9], d); } },
-      { id: "t2_class", n: "谁说得对（分类）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG1"].variants[10], d); } },
-      { id: "t2_ball", n: "谁说得对（球和圆柱）", hard: true, gen: function (d) { return __dg(__DECL["sayG1"].variants[11], d); } }
+      { id: "t1_swap", n: "交换加数的位置", gen: function (d) { return __dg(__DECL["sayG1"].variants[8], d); } },
+      { id: "t2_even", n: "谁说得对（单双数）", gen: function (d) { return __dg(__DECL["sayG1"].variants[9], d); } },
+      { id: "t2_class", n: "谁说得对（分类）", gen: function (d) { return __dg(__DECL["sayG1"].variants[10], d); } },
+      { id: "t2_ball", n: "谁说得对（球和圆柱）", gen: function (d) { return __dg(__DECL["sayG1"].variants[11], d); } },
+      { id: "t3_add", n: "加法的意义", gen: function (d) { return __dg(__DECL["sayG1"].variants[12], d); } },
+      { id: "t3_sub", n: "减法的意义", gen: function (d) { return __dg(__DECL["sayG1"].variants[13], d); } },
+      { id: "t3_ball", n: "球的特征", gen: function (d) { return __dg(__DECL["sayG1"].variants[14], d); } }
     ]
   },
   sayG2: {
@@ -15516,10 +15753,13 @@ var KNOWLEDGE = {
       { id: "t1_acute", n: "锐角是什么", gen: function (d) { return __dg(__DECL["sayG2"].variants[5], d); } },
       { id: "t2_mul", n: "谁说得对（乘法）", gen: function (d) { return __dg(__DECL["sayG2"].variants[6], d); } },
       { id: "t2_len", n: "谁说得对（长度单位）", gen: function (d) { return __dg(__DECL["sayG2"].variants[7], d); } },
-      { id: "t1_pos3", n: "第几位是百位", hard: true, gen: function (d) { return __dg(__DECL["sayG2"].variants[8], d); } },
-      { id: "t2_clock", n: "谁说得对（钟面）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG2"].variants[9], d); } },
-      { id: "t2_look", n: "谁说得对（观察物体）", hard: true, gen: function (d) { return __dg(__DECL["sayG2"].variants[10], d); } },
-      { id: "t2_angle", n: "谁说得对（角的大小）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG2"].variants[11], d); } }
+      { id: "t1_pos3", n: "第几位是百位", gen: function (d) { return __dg(__DECL["sayG2"].variants[8], d); } },
+      { id: "t2_clock", n: "谁说得对（钟面）", gen: function (d) { return __dg(__DECL["sayG2"].variants[9], d); } },
+      { id: "t2_look", n: "谁说得对（观察物体）", gen: function (d) { return __dg(__DECL["sayG2"].variants[10], d); } },
+      { id: "t2_angle", n: "谁说得对（角的大小）", gen: function (d) { return __dg(__DECL["sayG2"].variants[11], d); } },
+      { id: "t3_mul", n: "乘法的意义", gen: function (d) { return __dg(__DECL["sayG2"].variants[12], d); } },
+      { id: "t3_div", n: "除法的意义", gen: function (d) { return __dg(__DECL["sayG2"].variants[13], d); } },
+      { id: "t3_vertex", n: "角有几个顶点", gen: function (d) { return __dg(__DECL["sayG2"].variants[14], d); } }
     ]
   },
   sayG3: {
@@ -15534,10 +15774,13 @@ var KNOWLEDGE = {
       { id: "t1_area", n: "长方形面积公式", gen: function (d) { return __dg(__DECL["sayG3"].variants[5], d); } },
       { id: "t2_pa", n: "谁说得对（周长面积）", gen: function (d) { return __dg(__DECL["sayG3"].variants[6], d); } },
       { id: "t2_date", n: "谁说得对（年月日）", gen: function (d) { return __dg(__DECL["sayG3"].variants[7], d); } },
-      { id: "t1_zero", n: "0 乘任何数", hard: true, gen: function (d) { return __dg(__DECL["sayG3"].variants[8], d); } },
-      { id: "t2_dir", n: "谁说得对（方向）", hard: true, gen: function (d) { return __dg(__DECL["sayG3"].variants[9], d); } },
-      { id: "t2_table", n: "谁说得对（复式统计表）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG3"].variants[10], d); } },
-      { id: "t2_unit", n: "谁说得对（单位换算）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG3"].variants[11], d); } }
+      { id: "t1_zero", n: "0 乘任何数", gen: function (d) { return __dg(__DECL["sayG3"].variants[8], d); } },
+      { id: "t2_dir", n: "谁说得对（方向）", gen: function (d) { return __dg(__DECL["sayG3"].variants[9], d); } },
+      { id: "t2_table", n: "谁说得对（复式统计表）", gen: function (d) { return __dg(__DECL["sayG3"].variants[10], d); } },
+      { id: "t2_unit", n: "谁说得对（单位换算）", gen: function (d) { return __dg(__DECL["sayG3"].variants[11], d); } },
+      { id: "t3_peri", n: "周长的意义", gen: function (d) { return __dg(__DECL["sayG3"].variants[12], d); } },
+      { id: "t3_area", n: "面积的意义", gen: function (d) { return __dg(__DECL["sayG3"].variants[13], d); } },
+      { id: "t3_frac", n: "几分之一", gen: function (d) { return __dg(__DECL["sayG3"].variants[14], d); } }
     ]
   },
   sayG4: {
@@ -15552,10 +15795,13 @@ var KNOWLEDGE = {
       { id: "t1_perp", n: "什么叫互相垂直", gen: function (d) { return __dg(__DECL["sayG4"].variants[5], d); } },
       { id: "t2_big", n: "谁说得对（大数）", gen: function (d) { return __dg(__DECL["sayG4"].variants[6], d); } },
       { id: "t2_avg", n: "谁说得对（平均数）", gen: function (d) { return __dg(__DECL["sayG4"].variants[7], d); } },
-      { id: "t1_decp", n: "小数加减先对齐什么", hard: true, gen: function (d) { return __dg(__DECL["sayG4"].variants[8], d); } },
-      { id: "t2_tri", n: "谁说得对（三角形）", hard: true, gen: function (d) { return __dg(__DECL["sayG4"].variants[9], d); } },
-      { id: "t2_opt", n: "谁说得对（优化）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG4"].variants[10], d); } },
-      { id: "t2_sym", n: "谁说得对（轴对称）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG4"].variants[11], d); } }
+      { id: "t1_decp", n: "小数加减先对齐什么", gen: function (d) { return __dg(__DECL["sayG4"].variants[8], d); } },
+      { id: "t2_tri", n: "谁说得对（三角形）", gen: function (d) { return __dg(__DECL["sayG4"].variants[9], d); } },
+      { id: "t2_opt", n: "谁说得对（优化）", gen: function (d) { return __dg(__DECL["sayG4"].variants[10], d); } },
+      { id: "t2_sym", n: "谁说得对（轴对称）", gen: function (d) { return __dg(__DECL["sayG4"].variants[11], d); } },
+      { id: "t3_perp", n: "垂直的意义", gen: function (d) { return __dg(__DECL["sayG4"].variants[12], d); } },
+      { id: "t3_para", n: "平行线的意义", gen: function (d) { return __dg(__DECL["sayG4"].variants[13], d); } },
+      { id: "t3_tri", n: "三角形三边关系", gen: function (d) { return __dg(__DECL["sayG4"].variants[14], d); } }
     ]
   },
   sayG5: {
@@ -15570,10 +15816,13 @@ var KNOWLEDGE = {
       { id: "t1_para", n: "平行四边形面积公式", gen: function (d) { return __dg(__DECL["sayG5"].variants[5], d); } },
       { id: "t2_fac", n: "谁说得对（因数质数）", gen: function (d) { return __dg(__DECL["sayG5"].variants[6], d); } },
       { id: "t2_frac", n: "谁说得对（分数的性质）", gen: function (d) { return __dg(__DECL["sayG5"].variants[7], d); } },
-      { id: "t1_chance", n: "一定可能不可能", hard: true, gen: function (d) { return __dg(__DECL["sayG5"].variants[8], d); } },
-      { id: "t2_view", n: "谁说得对（三视图）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG5"].variants[9], d); } },
-      { id: "t2_rot", n: "谁说得对（旋转）", hard: true, gen: function (d) { return __dg(__DECL["sayG5"].variants[10], d); } },
-      { id: "t2_line", n: "谁说得对（折线图）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG5"].variants[11], d); } }
+      { id: "t1_chance", n: "一定可能不可能", gen: function (d) { return __dg(__DECL["sayG5"].variants[8], d); } },
+      { id: "t2_view", n: "谁说得对（三视图）", gen: function (d) { return __dg(__DECL["sayG5"].variants[9], d); } },
+      { id: "t2_rot", n: "谁说得对（旋转）", gen: function (d) { return __dg(__DECL["sayG5"].variants[10], d); } },
+      { id: "t2_line", n: "谁说得对（折线图）", gen: function (d) { return __dg(__DECL["sayG5"].variants[11], d); } },
+      { id: "t3_prime", n: "质数的意义", gen: function (d) { return __dg(__DECL["sayG5"].variants[12], d); } },
+      { id: "t3_maxfac", n: "最大的因数", gen: function (d) { return __dg(__DECL["sayG5"].variants[13], d); } },
+      { id: "t3_surf", n: "表面积的意义", gen: function (d) { return __dg(__DECL["sayG5"].variants[14], d); } }
     ]
   },
   sayG6: {
@@ -15588,10 +15837,13 @@ var KNOWLEDGE = {
       { id: "t1_neg0", n: "0 是什么数", gen: function (d) { return __dg(__DECL["sayG6"].variants[5], d); } },
       { id: "t2_frac", n: "谁说得对（分数除法）", gen: function (d) { return __dg(__DECL["sayG6"].variants[6], d); } },
       { id: "t2_circ", n: "谁说得对（圆）", gen: function (d) { return __dg(__DECL["sayG6"].variants[7], d); } },
-      { id: "t1_pigeon", n: "鸽巢原理算至少", hard: true, gen: function (d) { return __dg(__DECL["sayG6"].variants[8], d); } },
-      { id: "t2_pct", n: "谁说得对（百分数）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG6"].variants[9], d); } },
-      { id: "t2_pie", n: "谁说得对（扇形图）", hard: true, minD: 1, gen: function (d) { return __dg(__DECL["sayG6"].variants[10], d); } },
-      { id: "t2_neg", n: "谁说得对（负数）", hard: true, gen: function (d) { return __dg(__DECL["sayG6"].variants[11], d); } }
+      { id: "t1_pigeon", n: "鸽巢原理算至少", gen: function (d) { return __dg(__DECL["sayG6"].variants[8], d); } },
+      { id: "t2_pct", n: "谁说得对（百分数）", gen: function (d) { return __dg(__DECL["sayG6"].variants[9], d); } },
+      { id: "t2_pie", n: "谁说得对（扇形图）", gen: function (d) { return __dg(__DECL["sayG6"].variants[10], d); } },
+      { id: "t2_neg", n: "谁说得对（负数）", gen: function (d) { return __dg(__DECL["sayG6"].variants[11], d); } },
+      { id: "t3_pi", n: "圆周率的意义", gen: function (d) { return __dg(__DECL["sayG6"].variants[12], d); } },
+      { id: "t3_ratio", n: "比例的意义", gen: function (d) { return __dg(__DECL["sayG6"].variants[13], d); } },
+      { id: "t3_cylside", n: "圆柱侧面展开图", gen: function (d) { return __dg(__DECL["sayG6"].variants[14], d); } }
     ]
   }
 };
@@ -28900,6 +29152,7 @@ document.getElementById('btnAgain').onclick = function () {
    ======================================================================= */
 /* ==== UPDATE_LOG 自动生成段 · 真源 docs/02-更新公告/更新公告-完整版.md ==== */
 var UPDATE_LOG = [
+  { v: "v1.20.0", d: "10-30", one: "定理与定律多了一批「问定义」的题，而且平时就能遇到了", notes: ["每个年级多 3 道问定义的题：三年级的「围图形一周的长度，叫它的 □」，五年级的「只有 1 和它本身两个因数的数，叫 □」。以前那 72 道全是「判断对错」和「填个数」，一道问「叫什么」的都没有。","更要紧的是：这些题以前日常战斗基本碰不到。其中 24 道被标成「进阶」，只在裂隙和守律者那里出；另有 12 道被挡在基础档外。现在标记全撤了 —— 它们回到每一场普通战斗里。","每个年级现在 15 道（12 判断填空 + 3 问定义），六年级共 90 道。题目更\"杂\"了，不太会连着碰见同一类问法。"] },
   { v: "v1.19.0", d: "10-30", one: "旧影有了人形（剪影）；战斗里多了一小团跟着你飘的火", notes: ["旧影台那四句收人的话，现在有人站在对面：一个披着长袍的剪影，下摆淡进地里，只有一圈暖光勾出轮廓。它没有脸——它是影子，不是人。","答错之后那段讲解也一样：说话的那位现在会站在台上，不再只有声音。","战斗里有一小团火跟着你飘：贴在你肩头右侧，慢慢游、忽明忽暗，你挨打时它跟着抖。收过旧影才出现；它出手那一下，火会先亮一下。","旧影的名字改成只用那 18 位（每年级 3 位），不再读你别的存档里的名字。同一学年收满 3 位就收不到了，再进去会说「这儿的灯都点过了」。"] },
   { v: "v1.18.0", d: "10-29", one: "旧影真的会跟着你了；讲解改成「这个点没学会」才讲", notes: ["你在旧影台收下的那一位，从今往后替你出手、替你挡那一下的就是他。以前来帮忙的是路过的影子，抽到谁是谁；现在出场的就是你认识的那个人，回来的第一句话是他的口气。","你换到别的年级去，他还是会来 —— 但那时候他说的是「又见面了，我还认得你」。他不会再拿自己那年级的话糊弄你。","还没收过旧影的，裂隙残血时照样会有路过的影子扶一把 —— 那份惊喜留着。","讲解变得少而准：以前一场里错一次就讲，现在只有「这个知识点你累计错了三次以上、错比对多」，或者「这一场同一个点错了两次」，他才会开口。讲过的点不再自动重播，结算页会留一行小字告诉你去哪儿重听。","重听一律给完整四句 —— 以前「听过就只讲两句」，现在不必了，因为他不会自己再讲第二遍。","旧影台可以换人了：收过旧影之后再点那一格，进去是一排烛台——亮着的那盏是跟着你的这位，点另一盏就能请他。换之前会先问你一句，换了有个两屏的交接：走的那位说「我在这儿等过你」，来的那位说自己那句。"] },
   { v: "v1.17.1", d: "10-29", one: "家长面板里六个年级的说法题都标了课本位置", notes: ["人物 → 家长 → 知识点掌握，每个知识点下面那行小字写着「在课本哪一册哪一单元」。说法题那六条以前是空的，现在补上了。","说法题本来就不是某一单元的题——它把整册的定义、公式、换算拿出来问，所以位置写成「每册主要几单元 等」，不是精确到某一页。","这一版补的是人教课本的位置。用北师、苏教、冀教的话，这一栏仍会显示人教的说法；但「几年级出这道题」是按你那版单独核过的，不影响会不会抽到没学过的东西。"] },
@@ -28985,13 +29238,13 @@ var UPDATE_LOG = [
 /* 批 B45：这一版改了什么 —— 只留 1~3 条，给「首页右下角 / 设置里」共用。
    ⚠️ 这是「当前版本」的正文，历史版本在 UPDATE_LOG 里（自动烘焙，别手改）。 */
 var UPDATE_NOTE = {
-  ver: 'v1.19.0',
+  ver: 'v1.20.0',
   date: '2026-10-30',
-  one: '旧影有了人形，战斗里还有一小团火跟着你飘。',
+  one: '定理与定律题里多了一批「问定义」的题，而且这些题平时就能遇到了。',
   items: [
-    '旧影台收人的那四句，现在有人站在对面了：一个披长袍的剪影，下摆淡进地里，只有一圈暖光勾轮廓。它没有脸——它是影子。答错后的讲解也一样，说话的那位会站上台。',
-    '战斗里有一小团火跟着你飘：贴在你肩头右侧，慢慢游、忽明忽暗，你挨打时它跟着抖。收过旧影才出现；它出手那一下，火会先亮一下，让你知道光是从它那儿来的。',
-    '名字改成只用那 18 位旧影（每年级 3 位），不再读你别的存档里的名字。同一学年收满 3 位就收不到了，再进去会说「这儿的灯都点过了」。'
+    '每个年级新增 3 条问定义的题：比如三年级的「围图形一周的长度，叫它的 □」。以前这 72 条全是「判断对错」和「填个数」，一条问「叫什么」的都没有。',
+    '更要紧的是：这些题以前日常战斗基本碰不到。其中 24 条被标成「进阶」，只在裂隙和守律者那里出；另有 12 条被挡在基础档外。现在标记全撤了 —— 你说的「这些都属于基础性问题」，所以它们回到每一场普通战斗里。',
+    '每个年级现在 15 条（12 判断填空 + 3 问定义），六年级共 90 条。'
   ]
 };
 
